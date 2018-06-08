@@ -1,2 +1,2 @@
 # Fircontrol
-This project is about lithium battery  Fire control
+This  is a lithium-battery  Fire control project
