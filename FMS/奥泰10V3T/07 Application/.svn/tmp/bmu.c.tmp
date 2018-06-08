@@ -1,0 +1,267 @@
+/**
+  ******************************************************************************
+  * proj    firmware startup project
+  * file    BMU.c
+  * ver     1.0
+  * brief   This is a BMU file for all C files.
+  ------------------------------------------------------------------------------
+  * 2012.02 created by taoyu@bakai.com
+  */ 
+
+/* File Id -------------------------------------------------------------------*/
+#define _BMU_C_ 0x71
+#define FILE_No _BMU_C_
+
+/* Includes ------------------------------------------------------------------*/
+#include  "bmu.h"  /* mandotary */
+#include  "can.h"
+#include  "wx.h"
+#include  "mcu.h"
+#include  "vs.h"
+#include  "ltc6802.h"
+#include  "ts.h"
+#include  "bal.h"
+#include  "cal.h"
+#include  "pi.h"
+#include  "sc.h"
+#include  "mng.h"
+
+/* Private Macros & Defines --------------------------------------------------*/
+
+/* Private typedefs ----------------------------------------------------------*/
+
+typedef struct
+{
+  gt_eBmuMode eMode;
+}
+lt_sBmu;
+
+/* Private consts ------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+lt_sBmu lv_sBmu;
+unsigned char fanStatus;
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* Global consts -------------------------------------------------------------*/
+
+/* Global variables ----------------------------------------------------------*/
+
+/* Functions -----------------------------------------------------------------*/
+
+static int lf_nBmuLoad(void)
+{
+  int res;
+  DBG_PRINTF("lf_nBmuLoad()\r\n");
+  
+  /* 加载产品信息 */
+  res = gf_nPIInit(); if( res!=OK ) return res;  
+  res = gf_nPILoad(); if( res!=OK ) return res;
+  
+  /* 加载系统配置 */
+  res = gf_nSCInit(); if( res!=OK ) return res;  
+  res = gf_nSCLoad(); if( res!=OK ) return res;
+  
+  /* 完成 */
+  DBG_PRINTF(" - OK: lf_nBmuLoad\r\n");
+  return  OK;  
+}
+
+static gt_eBmuMode lf_eBmuRunConfig(void)
+{
+  unsigned char exit = 0;
+  DBG_PRINTF("lf_eBmuRunConfig()\r\n");
+  
+  /* 开启各个模块 */
+  mng_init();
+  
+  /* 开始运行 */
+  while(exit==0){
+
+    /* 喂狗 */
+    feed_watch_dog();
+  
+    /* 处理CAN接收 */
+    exit = mng_crx_proc();
+
+  }
+
+  /* 关闭各个模块 */
+  mng_reset();
+
+  DBG_PRINTF(" - End: lf_eBmuRunConfig\r\n");
+  /* 下一个模式 */
+  return  BMU_MODE_NORMAL;
+}
+
+static gt_eBmuMode lf_eBmuRunNormal(void)
+{
+  unsigned char exit = 0;
+  DBG_PRINTF("lf_eBmuRunNormal()\r\n");
+  
+  /* 开启各功能模块 */
+  wx_init();
+  vs_init();
+  ts_init();
+  cal_init();
+  bal_init();
+
+  /* 运行各功能模块 */
+  while(exit==0){
+
+    /* 喂狗 */  
+    feed_watch_dog();
+
+    /* 同步 */
+//    DBG_PRINTF("sync\n");
+    wx_sync();
+
+    /* CAN接收 */
+//    DBG_PRINTF("crx\n");
+    exit = wx_crx_proc();
+    
+    /* 电压采集 */
+//    DBG_PRINTF("vs\n");
+    vs_proc();
+
+    /* 温度采集 */
+//    DBG_PRINTF("ts\n");
+    ts_proc();
+    
+    /* 计算统计 */
+//    DBG_PRINTF("cal\n");
+    cal_proc();
+
+    /* 均衡控制 */
+//    DBG_PRINTF("bal\n");
+    bal_proc();
+    
+    /* 热控制 */
+        
+    /* CAN发送 */
+//    DBG_PRINTF("ctx\n\r");
+    wx_ctx();
+    
+    //fan drive
+//    lf_fanDrive();
+
+  }
+  
+  /* 关闭各个功能模块 */
+  bal_reset();
+  cal_reset();
+  ts_reset();
+  vs_reset();
+  wx_reset();
+
+  DBG_PRINTF(" - End: lf_eBmuRunNormal\r\n");
+  /* 下一个工作模式 */  
+  return  BMU_MODE_CONFIG;
+}
+
+// 检测高端6802是否存在
+static void lf_vBmuTestB(void)
+{
+  gt_ePinNumber en = gv_sSC.sVS.saLtc6802[1].eLtc6802EnaN;
+  gt_ePinNumber cs = gv_sSC.sVS.saLtc6802[1].eLtc6802SpiCsN;
+  unsigned char da = gv_sSC.sVS.saLtc6802[1].bDeviceAddress;
+  int res;
+  static ltc6802_cfgreg_t cfg;
+
+  (void)ltc6802_init();
+  (void)pin_high(en); // 光偶打开
+  delay_ms(20);    /* delay 20ms */
+
+  (void)pin_low(cs);  // cs选中
+  res = ltc6802_rdcfg(da,&cfg); // 读取配置寄存器
+  (void)pin_high(cs); // cs释放  
+
+  (void)pin_low(en);  // 光偶关闭
+  delay_ms(20);    /* delay 20ms */
+  (void)ltc6802_reset();  
+  
+  if( res==OK ) return; // 存在
+  
+  // 更改配置为12串
+  gv_sSC.sVS.bLtc6802Count = 1; // 测量时只检测一个6802
+  gv_sSC.sCal.bVoltCount = 10; // 统计时只计算低端10个电压
+  gv_sSC.sWX.bVoltCount = 10;   // 输出时只输出10个电压  
+
+}
+
+/**
+  * bref    BMU function
+  * param   none
+  * retval  none
+  */
+
+void gf_vBmuMain(void)
+{
+  int res;
+  DBG_PRINTF("bmu_main()\r\n");
+  
+  /* 加载配置 */
+  res = lf_nBmuLoad();
+  if( gv_sSC.sVS.bLtc6802Count>1 )lf_vBmuTestB();
+  
+  /* 初始模式 */   
+  lv_sBmu.eMode = BMU_MODE_NONE;
+  if( res==OK ) lv_sBmu.eMode = gv_sSC.sBMU.eDefaultMode;
+  if( lv_sBmu.eMode==BMU_MODE_NONE ) lv_sBmu.eMode = BMU_MODE_CONFIG;
+  DBG_PRINTF(" - Start Mode: %d\r\n", lv_sBmu.eMode);
+  
+  /* 按模式开始运行 */
+  for(;;){
+    switch( lv_sBmu.eMode ){
+      case  BMU_MODE_NORMAL:
+        lv_sBmu.eMode = lf_eBmuRunNormal();
+        break;
+      default:
+        lv_sBmu.eMode = lf_eBmuRunConfig();
+        break;
+    }
+  }
+
+}
+
+void gf_vCanRxcb(can_frame_t * f)
+{
+  /* 按模式保存消息 */
+  switch( lv_sBmu.eMode ){
+    case  BMU_MODE_NORMAL:
+      wx_crx_save(f);
+      break;
+    default:
+      mng_crx_save(f);
+      break;
+  }
+}
+
+
+unsigned char gf_fanDrive(void) 
+{
+  unsigned char fanTemp;
+  fanTemp = (cal.tmax + 5) / 10 - (cal.tmin + 5) / 10;    //Temp threshold difference
+  
+  if((fanTemp >= FANSTARTTEMP) || (cal.tmax >= FANMAXTEMP)) 
+  {
+    pin_high(PN_FAN_ENA);
+    fanStatus = 1;
+    return 1;
+  }
+  else 
+  {
+    pin_low(PN_FAN_ENA);
+    fanStatus =0;
+    return 0;
+  }
+}
+
+unsigned char gf_fanStatus(void) 
+{
+  if(fanStatus == 1) return 1;
+  if(fanStatus == 0) return 0;
+}
+

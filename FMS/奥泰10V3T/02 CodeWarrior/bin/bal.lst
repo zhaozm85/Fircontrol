@@ -1,0 +1,630 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    template.c
+    5:    * ver     1.0
+    6:    * brief   This is a template file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _BAL_C_  0x76
+   13:  #define FILE_No _BAL_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "bal.h"  /* mandotary */
+   17:  #include  "sc.h"
+   18:  #include  "vs.h"
+   19:  #include  "mcu.h"
+   20:  #include  "can.h"
+   21:  #include  "cal.h"
+   22:  
+   23:  /* Private Macros & Defines --------------------------------------------------*/
+   24:  
+   25:  /* Private typedefs ----------------------------------------------------------*/
+   26:  
+   27:  typedef struct
+   28:  {
+   29:    //  low level control
+   30:    unsigned char   low_cnt;  //  cycle count
+   31:    unsigned long   low_req;  //  final balance;
+   32:    unsigned long   low_stt;  //  balance status
+   33:    unsigned char   low_hot;      //  hot status
+   34:    //  external
+   35:    unsigned char   ext_ena;
+   36:    unsigned long   ext_bal;
+   37:    //  internal
+   38:    unsigned char   int_ena;
+   39:    unsigned long   int_bal;
+   40:    unsigned short  int_cnt;
+   41:  }
+   42:  bal_t;
+   43:  
+   44:  /* Private consts ------------------------------------------------------------*/
+   45:  
+   46:  /* Private variables ---------------------------------------------------------*/
+   47:  
+   48:  bal_t bal;
+   49:  
+   50:  /* Private function prototypes -----------------------------------------------*/
+   51:  
+   52:  /* Global consts -------------------------------------------------------------*/
+   53:  
+   54:  /* Global variables ----------------------------------------------------------*/
+   55:  
+   56:  /* Functions -----------------------------------------------------------------*/
+   57:  
+   58:  /**
+   59:    * bref    template function
+   60:    * param   none
+   61:    * retval  none
+   62:    */
+   63:  
+   64:  void  bal_init(void)
+   65:  {
+
+Function: bal_init
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+   66:    bal.ext_bal = 0;
+  0000 5f       [1]             CLRX  
+  0001 8c       [1]             CLRH  
+  0002 96000d   [5]             STHX  bal:13
+  0005 96000b   [5]             STHX  bal:11
+   67:    bal.ext_ena = 0;
+  0008 cf000a   [4]             STX   bal:10
+   68:    bal.int_bal = 0;
+  000b 960012   [5]             STHX  bal:18
+  000e 960010   [5]             STHX  bal:16
+   69:    bal.int_ena = 0;
+  0011 cf000f   [4]             STX   bal:15
+   70:    bal.int_cnt = 0;
+  0014 960014   [5]             STHX  bal:20
+   71:    bal.low_req = 0;
+  0017 960003   [5]             STHX  bal:3
+  001a 960001   [5]             STHX  bal:1
+   72:    bal.low_stt = 0;
+  001d 960007   [5]             STHX  bal:7
+  0020 960005   [5]             STHX  bal:5
+   73:    bal.low_cnt = 0;
+  0023 cf0000   [4]             STX   bal
+   74:    bal.low_hot = 0;
+  0026 cf0009   [4]             STX   bal:9
+   75:  }
+  0029 81       [6]             RTS   
+   76:  
+   77:  void  bal_reset(void)
+   78:  {
+
+Function: bal_reset
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+   79:  }
+  0000 81       [6]             RTS   
+   80:  
+   81:  static void bal_proc_low(void){
+
+Function: bal_proc_low
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  0000 a7f9     [2]             AIS   #-7
+   82:  
+   83:    unsigned long fb;
+   84:  
+   85:    //  enable control
+   86:    if( gv_sSC.sBal.bLowEnabled==0 ) return;
+  0002 c60107   [4]             LDA   gv_sSC:263
+  0005 2603     [3]             BNE   LA ;abs = 000a
+  0007 cc009d   [4]             JMP   L9D ;abs = 009d
+  000a          LA:     
+   87:  
+   88:    //  temp check
+   89:    if( cal.bal_temp < gv_sSC.sBal.hLowTempCool ){
+  000a 32010a   [5]             LDHX  gv_sSC:266
+  000d 3e00d8   [6]             CPHX  cal:216
+  0010 2303     [3]             BLS   L15 ;abs = 0015
+   90:      bal.low_hot = 0;
+  0012 4f       [1]             CLRA  
+   91:    }else if( cal.bal_temp > gv_sSC.sBal.hLowTempHot ){
+  0013 200a     [3]             BRA   L1F ;abs = 001f
+  0015          L15:    
+  0015 32010c   [5]             LDHX  gv_sSC:268
+  0018 3e00d8   [6]             CPHX  cal:216
+  001b 2405     [3]             BCC   L22 ;abs = 0022
+   92:      bal.low_hot = 1;
+  001d a601     [2]             LDA   #1
+  001f          L1F:    
+  001f c70009   [4]             STA   bal:9
+  0022          L22:    
+   93:    }
+   94:    
+   95:    //  balance status
+   96:    if( bal.low_hot ){
+  0022 c60009   [4]             LDA   bal:9
+  0025 2707     [3]             BEQ   L2E ;abs = 002e
+   97:      bal.low_stt = 0;
+  0027 5f       [1]             CLRX  
+  0028 8c       [1]             CLRH  
+  0029 960007   [5]             STHX  bal:7
+   98:    }else{
+  002c 2009     [3]             BRA   L37 ;abs = 0037
+  002e          L2E:    
+   99:      bal.low_stt = bal.low_req;
+  002e 320003   [5]             LDHX  bal:3
+  0031 960007   [5]             STHX  bal:7
+  0034 320001   [5]             LDHX  bal:1
+  0037          L37:    
+  0037 960005   [5]             STHX  bal:5
+  100:    }
+  101:  
+  102:    //  duty control
+  103:    if( bal.low_cnt < gv_sSC.sBal.bLowBalanceCycles ){
+  003a c60109   [4]             LDA   gv_sSC:265
+  003d c10000   [4]             CMP   bal
+  0040 230b     [3]             BLS   L4D ;abs = 004d
+  104:      fb = bal.low_stt;
+  0042 320007   [5]             LDHX  bal:7
+  0045 9eff03   [5]             STHX  3,SP
+  0048 320005   [5]             LDHX  bal:5
+  105:    }else{
+  004b 2005     [3]             BRA   L52 ;abs = 0052
+  004d          L4D:    
+  106:      fb = 0;
+  004d 5f       [1]             CLRX  
+  004e 8c       [1]             CLRH  
+  004f 9eff03   [5]             STHX  3,SP
+  0052          L52:    
+  0052 9eff01   [5]             STHX  1,SP
+  107:    }
+  108:    bal.low_cnt ++;
+  0055 450000   [3]             LDHX  @bal
+  0058 7c       [4]             INC   ,X
+  109:    if( bal.low_cnt >= gv_sSC.sBal.bLowRoundCycles ){
+  0059 c60108   [4]             LDA   gv_sSC:264
+  005c c10000   [4]             CMP   bal
+  005f 2204     [3]             BHI   L65 ;abs = 0065
+  110:      bal.low_cnt = 0;
+  0061 4f       [1]             CLRA  
+  0062 c70000   [4]             STA   bal
+  0065          L65:    
+  111:    }
+  112:  
+  113:    //  set to 6802
+  114:  #if LTC6802_MAX>2
+  115:  #error  balance support max 2 ltc6802s
+  116:  #else
+  117:    {
+  118:      unsigned char i;
+  119:      for(i=0;i<LTC6802_MAX;i++){
+  0065 95       [2]             TSX   
+  0066 6f04     [5]             CLR   4,X
+  0068          L68:    
+  120:        unsigned short b;
+  121:        b = (unsigned short)(fb&0xFFF);
+  0068 e603     [3]             LDA   3,X
+  006a 87       [2]             PSHA  
+  006b e602     [3]             LDA   2,X
+  006d a40f     [2]             AND   #15
+  006f 87       [2]             PSHA  
+  0070 8a       [3]             PULH  
+  0071 88       [3]             PULX  
+  0072 9eff06   [5]             STHX  6,SP
+  122:        vs_data[i].balance = b;
+  0075 95       [2]             TSX   
+  0076 ee04     [3]             LDX   4,X
+  0078 9f       [1]             TXA   
+  0079 62       [1]             NSA   
+  007a a4f0     [2]             AND   #-16
+  007c 48       [1]             LSLA  
+  007d 8c       [1]             CLRH  
+  007e 97       [1]             TAX   
+  007f 9ee607   [4]             LDA   7,SP
+  0082 d7001f   [4]             STA   @vs_data:31,X
+  0085 9ee606   [4]             LDA   6,SP
+  0088 d7001e   [4]             STA   @vs_data:30,X
+  123:        fb >>= 12;
+  008b 95       [2]             TSX   
+  008c a60c     [2]             LDA   #12
+  008e cd0000   [6]             JSR   _LLSR
+  0091 cd0000   [6]             JSR   _POP32
+  0094 95       [2]             TSX   
+  0095 6c04     [5]             INC   4,X
+  0097 e604     [3]             LDA   4,X
+  0099 a102     [2]             CMP   #2
+  009b 25cb     [3]             BCS   L68 ;abs = 0068
+  009d          L9D:    
+  124:      }
+  125:    }
+  126:  #endif  
+  127:  
+  128:  }
+  009d a707     [2]             AIS   #7
+  009f 81       [6]             RTS   
+  129:  
+  130:  static unsigned long bal_get_ibal(void){
+
+Function: bal_get_ibal
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 a7f1     [2]             AIS   #-15
+  131:    unsigned char   i;
+  132:    unsigned long   mask;
+  133:    unsigned long   ibal;
+  134:    unsigned short  vmin;
+  135:  
+  136:    ibal = 0;  
+  0004 5f       [1]             CLRX  
+  0005 8c       [1]             CLRH  
+  0006 9eff05   [5]             STHX  5,SP
+  0009 9eff03   [5]             STHX  3,SP
+  137:    mask = 1;
+  000c 5c       [1]             INCX  
+  000d 9eff09   [5]             STHX  9,SP
+  0010 5f       [1]             CLRX  
+  0011 9eff07   [5]             STHX  7,SP
+  138:    vmin = cal.vmin;
+  0014 320036   [5]             LDHX  cal:54
+  0017 9eff0c   [5]             STHX  12,SP
+  139:    DBG_PRINTF("%u: ",vmin);
+  001a 89       [2]             PSHX  
+  001b 8b       [2]             PSHH  
+  001c 450000   [3]             LDHX  @"%u: "
+  001f 89       [2]             PSHX  
+  0020 8b       [2]             PSHH  
+  0021 cd0000   [6]             JSR   printf
+  0024 a704     [2]             AIS   #4
+  140:  
+  141:    for(i=0;i<gv_sSC.sCal.bVoltCount;i++){
+  0026 95       [2]             TSX   
+  0027 6f0a     [5]             CLR   10,X
+  0029 2066     [3]             BRA   L91 ;abs = 0091
+  002b          L2B:    
+  142:      unsigned short  volt;
+  143:      unsigned short  diff;
+  144:      
+  145:      volt = cal.volt[i];
+  002b 95       [2]             TSX   
+  002c ee0a     [3]             LDX   10,X
+  002e 58       [1]             LSLX  
+  002f 4f       [1]             CLRA  
+  0030 49       [1]             ROLA  
+  0031 87       [2]             PSHA  
+  0032 8a       [3]             PULH  
+  0033 9ebe0000 [6]             LDHX  @cal,X
+  0037 9eff0e   [5]             STHX  14,SP
+  146:      DBG_PRINTF("%u", volt);
+  003a 89       [2]             PSHX  
+  003b 8b       [2]             PSHH  
+  003c 9eff03   [5]             STHX  3,SP
+  003f 450000   [3]             LDHX  @"%u"
+  0042 89       [2]             PSHX  
+  0043 8b       [2]             PSHH  
+  0044 cd0000   [6]             JSR   printf
+  0047 a704     [2]             AIS   #4
+  147:      if( volt>vmin ){
+  0049 9efe01   [5]             LDHX  1,SP
+  004c 9ef30c   [6]             CPHX  12,SP
+  004f 232b     [3]             BLS   L7C ;abs = 007c
+  148:        diff = volt-vmin;
+  0051 95       [2]             TSX   
+  0052 e60e     [3]             LDA   14,X
+  0054 e00c     [3]             SUB   12,X
+  0056 87       [2]             PSHA  
+  0057 e60d     [3]             LDA   13,X
+  0059 e20b     [3]             SBC   11,X
+  149:        if( diff > gv_sSC.sBal.hIntVDiffBad ){
+  005b 87       [2]             PSHA  
+  005c 8a       [3]             PULH  
+  005d 88       [3]             PULX  
+  005e 3e0114   [6]             CPHX  gv_sSC:276
+  0061 2314     [3]             BLS   L77 ;abs = 0077
+  150:          ibal |= mask;
+  0063 95       [2]             TSX   
+  0064 af02     [2]             AIX   #2
+  0066 89       [2]             PSHX  
+  0067 8b       [2]             PSHH  
+  0068 af04     [2]             AIX   #4
+  006a cd0000   [6]             JSR   _LOR
+  006d affc     [2]             AIX   #-4
+  006f cd0000   [6]             JSR   _POP32
+  151:          DBG_PRINTF("-, ");
+  0072 450000   [3]             LDHX  @"-, "
+  152:        }else{
+  0075 2008     [3]             BRA   L7F ;abs = 007f
+  0077          L77:    
+  153:          DBG_PRINTF("_, ");
+  0077 450000   [3]             LDHX  @"_, "
+  007a 2003     [3]             BRA   L7F ;abs = 007f
+  007c          L7C:    
+  154:        }
+  155:      }else{
+  156:        DBG_PRINTF("_, ");
+  007c 450000   [3]             LDHX  @"_, "
+  007f          L7F:    
+  007f 89       [2]             PSHX  
+  0080 8b       [2]             PSHH  
+  0081 cd0000   [6]             JSR   printf
+  0084 a702     [2]             AIS   #2
+  157:      }
+  158:      
+  159:      /* next cell */
+  160:      mask <<= 1;
+  0086 95       [2]             TSX   
+  0087 6809     [5]             LSL   9,X
+  0089 6908     [5]             ROL   8,X
+  008b 6907     [5]             ROL   7,X
+  008d 6906     [5]             ROL   6,X
+  008f 6c0a     [5]             INC   10,X
+  0091          L91:    
+  0091 c6008b   [4]             LDA   gv_sSC:139
+  0094 e10a     [3]             CMP   10,X
+  0096 2293     [3]             BHI   L2B ;abs = 002b
+  161:      
+  162:    }
+  163:  
+  164:    DBG_PRINTF(">> %lxh\r\n", ibal);
+  0098 9efe05   [5]             LDHX  5,SP
+  009b 89       [2]             PSHX  
+  009c 8b       [2]             PSHH  
+  009d 9efe05   [5]             LDHX  5,SP
+  00a0 89       [2]             PSHX  
+  00a1 8b       [2]             PSHH  
+  00a2 450000   [3]             LDHX  @">> %lxh\015\012"
+  00a5 89       [2]             PSHX  
+  00a6 8b       [2]             PSHH  
+  00a7 cd0000   [6]             JSR   printf
+  00aa a706     [2]             AIS   #6
+  165:    return ibal;
+  00ac 9efe10   [5]             LDHX  16,SP
+  00af 89       [2]             PSHX  
+  00b0 8b       [2]             PSHH  
+  00b1 95       [2]             TSX   
+  00b2 af04     [2]             AIX   #4
+  00b4 a604     [2]             LDA   #4
+  00b6 cd0000   [6]             JSR   _COPY
+  166:  }
+  00b9 a711     [2]             AIS   #17
+  00bb 81       [6]             RTS   
+  167:  
+  168:  static void bal_proc_ext(void)
+  169:  {
+
+Function: bal_proc_ext
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  170:    //  enable control
+  171:    if( bal.ext_ena && gv_sSC.sBal.bExtEnabled ){
+  0000 c6000a   [4]             LDA   bal:10
+  0003 2712     [3]             BEQ   L17 ;abs = 0017
+  0005 c6010e   [4]             LDA   gv_sSC:270
+  0008 270d     [3]             BEQ   L17 ;abs = 0017
+  172:  
+  173:      //  set to low
+  174:      bal.low_req = bal.ext_bal;
+  000a 32000d   [5]             LDHX  bal:13
+  000d 960003   [5]             STHX  bal:3
+  0010 32000b   [5]             LDHX  bal:11
+  0013 960001   [5]             STHX  bal:1
+  175:    }else{
+  0016 81       [6]             RTS   
+  0017          L17:    
+  176:  
+  177:      //  clear external balance
+  178:      bal.ext_bal = 0;
+  0017 5f       [1]             CLRX  
+  0018 8c       [1]             CLRH  
+  0019 96000d   [5]             STHX  bal:13
+  001c 96000b   [5]             STHX  bal:11
+  179:    }
+  180:  }
+  001f 81       [6]             RTS   
+  181:  
+  182:  static void bal_proc_int(void)
+  183:  {
+
+Function: bal_proc_int
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  0000 a7fc     [2]             AIS   #-4
+  184:    //  if external balance is on
+  185:    if( bal.ext_ena && gv_sSC.sBal.bExtEnabled ){
+  0002 c6000a   [4]             LDA   bal:10
+  0005 2705     [3]             BEQ   LC ;abs = 000c
+  0007 c6010e   [4]             LDA   gv_sSC:270
+  000a 2651     [3]             BNE   L5D ;abs = 005d
+  000c          LC:     
+  186:    
+  187:      //  clear internal balance
+  188:      bal.int_bal = 0;
+  189:      return;
+  190:    }
+  191:  
+  192:    //  set internal balance
+  193:    if( bal.int_ena && gv_sSC.sBal.bIntEnabled )
+  000c c6000f   [4]             LDA   bal:15
+  000f 274c     [3]             BEQ   L5D ;abs = 005d
+  0011 c6010f   [4]             LDA   gv_sSC:271
+  0014 2747     [3]             BEQ   L5D ;abs = 005d
+  194:    {
+  195:  
+  196:      //  cycle control
+  197:      if( bal.int_cnt==0 ){
+  0016 320014   [5]             LDHX  bal:20
+  0019 260f     [3]             BNE   L2A ;abs = 002a
+  198:        bal.int_bal = bal_get_ibal();
+  001b 95       [2]             TSX   
+  001c cd0000   [6]             JSR   bal_get_ibal
+  001f 9efe03   [5]             LDHX  3,SP
+  0022 960012   [5]             STHX  bal:18
+  0025 9efe01   [5]             LDHX  1,SP
+  199:      }else if( bal.int_cnt==gv_sSC.sBal.hIntBalanceCycles ){
+  0028 200d     [3]             BRA   L37 ;abs = 0037
+  002a          L2A:    
+  002a 320112   [5]             LDHX  gv_sSC:274
+  002d 3e0014   [6]             CPHX  bal:20
+  0030 2608     [3]             BNE   L3A ;abs = 003a
+  200:        bal.int_bal = 0;
+  0032 5f       [1]             CLRX  
+  0033 8c       [1]             CLRH  
+  0034 960012   [5]             STHX  bal:18
+  0037          L37:    
+  0037 960010   [5]             STHX  bal:16
+  003a          L3A:    
+  201:      }
+  202:      bal.int_cnt ++;
+  003a 450014   [3]             LDHX  @bal:20
+  003d 6c01     [5]             INC   1,X
+  003f 2601     [3]             BNE   L42 ;abs = 0042
+  0041 7c       [4]             INC   ,X
+  0042          L42:    
+  203:      if( bal.int_cnt>=gv_sSC.sBal.hIntRoundCycles ) bal.int_cnt = 0;
+  0042 320110   [5]             LDHX  gv_sSC:272
+  0045 3e0014   [6]             CPHX  bal:20
+  0048 2205     [3]             BHI   L4F ;abs = 004f
+  004a 5f       [1]             CLRX  
+  004b 8c       [1]             CLRH  
+  004c 960014   [5]             STHX  bal:20
+  004f          L4F:    
+  204:    
+  205:      //  set to low
+  206:      bal.low_req = bal.int_bal;
+  004f 320012   [5]             LDHX  bal:18
+  0052 960003   [5]             STHX  bal:3
+  0055 320010   [5]             LDHX  bal:16
+  0058 960001   [5]             STHX  bal:1
+  207:    }
+  005b 2008     [3]             BRA   L65 ;abs = 0065
+  005d          L5D:    
+  208:    else 
+  209:    { 
+  210:      //  clear internal balance
+  211:      bal.int_bal = 0;
+  005d 5f       [1]             CLRX  
+  005e 8c       [1]             CLRH  
+  005f 960012   [5]             STHX  bal:18
+  0062 960010   [5]             STHX  bal:16
+  0065          L65:    
+  212:    }
+  213:  }
+  0065 a704     [2]             AIS   #4
+  0067 81       [6]             RTS   
+  214:  
+  215:  void bal_proc(void)
+  216:  {
+
+Function: bal_proc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  217:  
+  218:    /* low level */
+  219:    bal_proc_low();
+  0000 cd0000   [6]             JSR   bal_proc_low
+  220:    
+  221:    /* external balance */
+  222:    bal_proc_ext();
+  0003 cd0000   [6]             JSR   bal_proc_ext
+  223:  
+  224:    /* internal balance */  
+  225:    bal_proc_int();
+  0006 2000     [3]             BRA   bal_proc_int
+  226:  
+  227:  }
+  228:  
+  229:  void bal_set_ext(unsigned long ebal)
+  230:  {
+
+Function: bal_set_ext
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  231:    bal.ext_bal = ebal;
+  0000 9efe05   [5]             LDHX  5,SP
+  0003 96000d   [5]             STHX  bal:13
+  0006 9efe03   [5]             LDHX  3,SP
+  0009 96000b   [5]             STHX  bal:11
+  232:  }
+  000c 81       [6]             RTS   
+  233:  
+  234:  void bal_ena_ext(unsigned char ena)
+  235:  {
+
+Function: bal_ena_ext
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  236:    bal.ext_ena = ena;
+  0000 c7000a   [4]             STA   bal:10
+  237:  }
+  0003 81       [6]             RTS   
+  238:  
+  239:  unsigned char bal_get_ext(void)
+  240:  {
+
+Function: bal_get_ext
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  241:    if( bal.ext_ena && gv_sSC.sBal.bExtEnabled ) return 1;
+  0000 c6000a   [4]             LDA   bal:10
+  0003 2708     [3]             BEQ   LD ;abs = 000d
+  0005 c6010e   [4]             LDA   gv_sSC:270
+  0008 2703     [3]             BEQ   LD ;abs = 000d
+  000a a601     [2]             LDA   #1
+  000c 81       [6]             RTS   
+  000d          LD:     
+  242:    return 0;
+  000d 4f       [1]             CLRA  
+  243:  }
+  000e 81       [6]             RTS   
+  244:  
+  245:  void bal_ena_int(unsigned char ena) 
+  246:  {
+
+Function: bal_ena_int
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  247:    bal.int_ena = ena;
+  0000 c7000f   [4]             STA   bal:15
+  248:  }
+  0003 81       [6]             RTS   
+  249:  
+  250:  unsigned char bal_get_int(void)
+  251:  {
+
+Function: bal_get_int
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\bal.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\bal.c.o" -WmsgSd1106
+
+  252:    if( bal.ext_ena && gv_sSC.sBal.bExtEnabled ) return 0;
+  0000 c6000a   [4]             LDA   bal:10
+  0003 2705     [3]             BEQ   LA ;abs = 000a
+  0005 c6010e   [4]             LDA   gv_sSC:270
+  0008 260d     [3]             BNE   L17 ;abs = 0017
+  000a          LA:     
+  253:    if( bal.int_ena && gv_sSC.sBal.bIntEnabled ) return 1;
+  000a c6000f   [4]             LDA   bal:15
+  000d 2708     [3]             BEQ   L17 ;abs = 0017
+  000f c6010f   [4]             LDA   gv_sSC:271
+  0012 2703     [3]             BEQ   L17 ;abs = 0017
+  0014 a601     [2]             LDA   #1
+  0016 81       [6]             RTS   
+  0017          L17:    
+  254:    return 0;
+  0017 4f       [1]             CLRA  
+  255:  }
+  0018 81       [6]             RTS   
+  256:  
+  257:  

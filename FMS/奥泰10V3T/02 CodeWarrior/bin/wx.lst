@@ -1,0 +1,556 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    WX.c
+    5:    * ver     1.0
+    6:    * brief   This is a WX file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _WX_C_  0x72
+   13:  #define FILE_No _WX_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "wx.h"  /* mandotary */
+   17:  #include  "mcu.h"
+   18:  #include  "vs.h"
+   19:  #include  "ts.h"
+   20:  #include  "bal.h"
+   21:  #include  "cal.h"
+   22:  #include  "sc.h"
+   23:  #include  "pi.h"
+   24:  
+   25:  /* Private Macros & Defines --------------------------------------------------*/
+   26:  
+   27:  #ifndef   TUNE_WX
+   28:  #define   TUNE_WX   0
+   29:  #endif
+   30:  
+   31:  #if TUNE_WX
+   32:  #define WX_PRINTF PRINTF
+   33:  #else
+   34:  #define WX_PRINTF empty_printf
+   35:  #endif
+   36:  
+   37:  /* Private typedefs ----------------------------------------------------------*/
+   38:  
+   39:  typedef union
+   40:  {
+   41:    volatile unsigned char all;
+   42:    struct
+   43:    {
+   44:      volatile unsigned heater:1;
+   45:      volatile unsigned fan:1;
+   46:      volatile unsigned bal:1;
+   47:      volatile unsigned sync:1;
+   48:      volatile unsigned sleep:1;
+   49:      volatile unsigned debug:1;
+   50:      volatile unsigned :2;
+   51:    }
+   52:    bit;
+   53:  }
+   54:  wx_ctrl_t;
+   55:  
+   56:  typedef union
+   57:  {
+   58:    volatile unsigned char  all;
+   59:    struct
+   60:    {
+   61:      volatile unsigned :4;
+   62:      volatile unsigned heat:1;
+   63:      volatile unsigned ext_bal:1;
+   64:      volatile unsigned fan:1;
+   65:      volatile unsigned int_bal:1;
+   66:    }
+   67:    bit;
+   68:  }
+   69:  wx_status_t;
+   70:  
+   71:  typedef union
+   72:  {
+   73:    volatile unsigned char  all;
+   74:    struct
+   75:    {
+   76:      volatile unsigned :2;
+   77:      volatile unsigned heat:1;
+   78:      volatile unsigned fan:1;
+   79:      volatile unsigned ts:1;
+   80:      volatile unsigned harness:1;
+   81:      volatile unsigned bal:1;
+   82:      volatile unsigned comm:1;
+   83:    }
+   84:    bit;
+   85:  }
+   86:  wx_errors_t;
+   87:  
+   88:  typedef struct {
+   89:  
+   90:    //  can rx
+   91:    unsigned char msg100_lock;
+   92:    unsigned char msg100_age;
+   93:    can_frame_t msg100;
+   94:  
+   95:    //  control
+   96:    wx_ctrl_t ctrl;
+   97:    wx_status_t status;
+   98:    wx_errors_t errors;
+   99:    unsigned long balance;
+  100:  
+  101:    //  output
+  102:    can_frame_t frame;
+  103:  
+  104:  }wx_t;
+  105:  
+  106:  /* Private consts ------------------------------------------------------------*/
+  107:  
+  108:  /* Private variables ---------------------------------------------------------*/
+  109:  
+  110:  wx_t  wx;
+  111:  
+  112:  /* Private function prototypes -----------------------------------------------*/
+  113:  
+  114:  /* Global consts -------------------------------------------------------------*/
+  115:  static unsigned short Firdata[6];
+  116:  static unsigned char F_index;
+  117:  /* Global variables ----------------------------------------------------------*/
+  118:  //extern unsigned char fanStatusSY;
+  119:  
+  120:  /* Functions -----------------------------------------------------------------*/
+  121:  
+  122:  /**
+  123:    * bref    WX function
+  124:    * param   none
+  125:    * retval  none
+  126:    */
+  127:  
+  128:  //void voltSelect(unsigned short cellVolt, unsigned char cellNum);
+  129:  
+  130:  void wx_init(void)
+  131:  {
+
+Function: wx_init
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  132:  
+  133:    /* runtime */
+  134:    wx.ctrl.all = 0;
+  0000 4f       [1]             CLRA  
+  0001 c70011   [4]             STA   wx:17
+  135:    wx.balance = 0x000000;  /* cell 24,23,22,21,20,...3,2,1 */
+  0004 8c       [1]             CLRH  
+  0005 5f       [1]             CLRX  
+  0006 960016   [5]             STHX  wx:22
+  0009 960014   [5]             STHX  wx:20
+  136:    
+  137:    //fanStatus = 0;    //fan status inital
+  138:    gv_sSC.sWX.bFanStatusLow = 0;
+  000c c7011f   [4]             STA   gv_sSC:287
+  139:    gv_sSC.sWX.bFanStatusHigh = 0; 
+  000f c70120   [4]             STA   gv_sSC:288
+  140:    
+  141:    //  sync
+  142:    dec_tick = 0;
+  0012 960002   [5]             STHX  dec_tick:2
+  0015 960000   [5]             STHX  dec_tick
+  143:    
+  144:    /* lower level */
+  145:    (void)can_init();
+  0018 cc0000   [4]             JMP   can_init
+  146:  }
+  147:  
+  148:  void wx_reset(void)
+  149:  {
+
+Function: wx_reset
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  150:    /* lower level */
+  151:    (void)can_reset();
+  0000 cc0000   [4]             JMP   can_reset
+  152:  }
+  153:  
+  154:  void wx_crx_save(can_frame_t * f)
+  155:  {
+
+Function: wx_crx_save
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  156:  
+  157:    /* msg100 */
+  158:    /*if( f->id==0x100 && wx.msg100_lock==0 ){
+  159:      wx.msg100_age = 0;
+  160:      wx.msg100 = *f;
+  161:    } */
+  162:    if( f->id==0x013){
+  0002 9ece02   [5]             LDHX  2,X
+  0005 650013   [3]             CPHX  #19
+  0008 2658     [3]             BNE   L62 ;abs = 0062
+  000a 9efe01   [5]             LDHX  1,SP
+  000d 9eae     [5]             LDHX  ,X
+  000f 2651     [3]             BNE   L62 ;abs = 0062
+  163:       Firdata[0]  = f->data[0]<<8;
+  0011 9efe01   [5]             LDHX  1,SP
+  0014 e605     [3]             LDA   5,X
+  0016 c70000   [4]             STA   Firdata
+  0019 4f       [1]             CLRA  
+  001a c70001   [4]             STA   Firdata:1
+  164:       Firdata[0] |= f->data[1];
+  001d e606     [3]             LDA   6,X
+  001f c70001   [4]             STA   Firdata:1
+  0022 c60000   [4]             LDA   Firdata
+  0025 c70000   [4]             STA   Firdata
+  165:       Firdata[1]  = f->data[2]<<8;
+  0028 e607     [3]             LDA   7,X
+  002a c70002   [4]             STA   Firdata:2
+  002d 4f       [1]             CLRA  
+  002e c70003   [4]             STA   Firdata:3
+  166:       Firdata[1] |= f->data[3];
+  0031 e608     [3]             LDA   8,X
+  0033 c70003   [4]             STA   Firdata:3
+  0036 c60002   [4]             LDA   Firdata:2
+  0039 c70002   [4]             STA   Firdata:2
+  167:       Firdata[2]  = f->data[4]<<8;
+  003c e609     [3]             LDA   9,X
+  003e c70004   [4]             STA   Firdata:4
+  0041 4f       [1]             CLRA  
+  0042 c70005   [4]             STA   Firdata:5
+  168:       Firdata[2] |= f->data[5];
+  0045 e60a     [3]             LDA   10,X
+  0047 c70005   [4]             STA   Firdata:5
+  004a c60004   [4]             LDA   Firdata:4
+  004d c70004   [4]             STA   Firdata:4
+  169:       Firdata[3]  = f->data[6]<<8;
+  0050 e60b     [3]             LDA   11,X
+  0052 c70006   [4]             STA   Firdata:6
+  0055 4f       [1]             CLRA  
+  0056 c70007   [4]             STA   Firdata:7
+  170:       Firdata[3] |= f->data[7];
+  0059 e60c     [3]             LDA   12,X
+  005b 450006   [3]             LDHX  @Firdata:6
+  005e e701     [3]             STA   1,X
+  0060 f6       [3]             LDA   ,X
+  0061 f7       [2]             STA   ,X
+  0062          L62:    
+  171:    }
+  172:        
+  173:  }
+  0062 a702     [2]             AIS   #2
+  0064 81       [6]             RTS   
+  174:  
+  175:  
+  176:  
+  177:  void wx_sync(void)
+  178:  {
+
+Function: wx_sync
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  179:  
+  180:    if( wx.ctrl.bit.sync ){
+  0000 c60011   [4]             LDA   wx:17
+  0003 a508     [2]             BIT   #8
+  0005 272f     [3]             BEQ   L36 ;abs = 0036
+  181:  
+  182:      /* wait next msg100 or timeout */
+  183:      dec_tick = gv_sSC.sWX.bSyncCycle * gv_sSC.sWX.bSyncTmoMul;
+  0007 c60119   [4]             LDA   gv_sSC:281
+  000a ce011a   [4]             LDX   gv_sSC:282
+  000d 42       [5]             MUL   
+  000e 87       [2]             PSHA  
+  000f cd0000   [6]             JSR   _SEXT16_32
+  0012 450000   [3]             LDHX  @dec_tick
+  0015 cd0000   [6]             JSR   _POP32
+  184:      while( wx.msg100_age>0 && dec_tick>0 ) feed_watch_dog();
+  0018 2003     [3]             BRA   L1D ;abs = 001d
+  001a          L1A:    
+  001a cd0000   [6]             JSR   feed_watch_dog
+  001d          L1D:    
+  001d c60001   [4]             LDA   wx:1
+  0020 2704     [3]             BEQ   L26 ;abs = 0026
+  0022 ad23     [5]             BSR   L47 ;abs = 0047
+  0024 26f4     [3]             BNE   L1A ;abs = 001a
+  0026          L26:    
+  0026 ad1f     [5]             BSR   L47 ;abs = 0047
+  185:  
+  186:      /* timeout */
+  187:      if( dec_tick==0 ){
+  0028 261c     [3]             BNE   L46 ;abs = 0046
+  188:        /* clear sync */
+  189:        wx.ctrl.bit.sync = 0;
+  002a 450011   [3]             LDHX  @wx:17
+  002d f6       [3]             LDA   ,X
+  002e a4f7     [2]             AND   #-9
+  0030 f7       [2]             STA   ,X
+  0031 2007     [3]             BRA   L3A ;abs = 003a
+  0033          L33:    
+  190:        /* set sync cycle */
+  191:        dec_tick = gv_sSC.sWX.bSyncCycle;
+  192:      }
+  193:  
+  194:    }else{
+  195:  
+  196:      /* wait cycle */
+  197:      while( dec_tick>0 ) feed_watch_dog();
+  0033 cd0000   [6]             JSR   feed_watch_dog
+  0036          L36:    
+  0036 ad0f     [5]             BSR   L47 ;abs = 0047
+  0038 26f9     [3]             BNE   L33 ;abs = 0033
+  003a          L3A:    
+  198:  
+  199:      /* set sync cycle */
+  200:      dec_tick = gv_sSC.sWX.bSyncCycle;
+  003a c60119   [4]             LDA   gv_sSC:281
+  003d 8c       [1]             CLRH  
+  003e 97       [1]             TAX   
+  003f 960002   [5]             STHX  dec_tick:2
+  0042 5f       [1]             CLRX  
+  0043 960000   [5]             STHX  dec_tick
+  0046          L46:    
+  201:  
+  202:    }
+  203:  
+  204:  }
+  0046 81       [6]             RTS   
+  0047          L47:    
+  0047 450000   [3]             LDHX  @dec_tick
+  004a e603     [3]             LDA   3,X
+  004c ea02     [3]             ORA   2,X
+  004e ea01     [3]             ORA   1,X
+  0050 fa       [3]             ORA   ,X
+  0051 81       [6]             RTS   
+  205:  
+  206:  unsigned char wx_crx_proc(void)
+  207:  {
+
+Function: wx_crx_proc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  208:  
+  209:    unsigned char exit = 0;
+  210:  
+  211:    /* lock msg in case access from ISR */
+  212:    wx.msg100_lock = 1;
+  0000 a601     [2]             LDA   #1
+  0002 c70000   [4]             STA   wx
+  213:  
+  214:    /* new msg */
+  215:    /*if( wx.msg100_age==0 ){
+  216:      unsigned char tgt;
+  217:  
+  218:      // match modnum 
+  219:      tgt = wx.msg100.data[0];
+  220:      if( tgt==0xff || tgt==gv_sSC.sWX.bModNum ){
+  221:        // control bits 
+  222:        wx.ctrl.all = wx.msg100.data[1];
+  223:        // bmu sleep 
+  224:        if( wx.ctrl.bit.sleep ){
+  225:          exit = 1;
+  226:          DBG_PRINTF("sleep from 0x100 cmd\r\n");
+  227:        }
+  228:        // balance 
+  229:        if( wx.ctrl.bit.bal ){
+  230:          (void)bal_ena_int(1);
+  231:        }else{
+  232:          (void)bal_ena_int(0);
+  233:        }
+  234:      }*/
+  235:      bal_ena_int(0);
+  0005 4f       [1]             CLRA  
+  0006 cd0000   [6]             JSR   bal_ena_int
+  236:      
+  237:     // return 0;
+  238:      
+  239:    //}
+  240:  
+  241:    /* age up */
+  242:  //  if( wx.msg100_age<0xFF ) wx.msg100_age ++;
+  243:  
+  244:    /* unlock */
+  245:  //  wx.msg100_lock = 0;
+  246:  
+  247:    return exit;
+  0009 4f       [1]             CLRA  
+  248:  
+  249:  }
+  000a 81       [6]             RTS   
+  250:  
+  251:  void wx_ctx(void)
+  252:  {
+
+Function: wx_ctx
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  0000 a7fd     [2]             AIS   #-3
+  253:  
+  254:  static unsigned char cnt = 0;
+  255:      
+  256:  #if TEMP
+  257:  cnt++;
+  0002 450000   [3]             LDHX  @cnt
+  0005 7c       [4]             INC   ,X
+  258:  if(cnt < 5) return; 
+  0006 c60000   [4]             LDA   cnt
+  0009 a105     [2]             CMP   #5
+  000b 256b     [3]             BCS   L78 ;abs = 0078
+  259:  cnt = 0;
+  000d 4f       [1]             CLRA  
+  000e c70000   [4]             STA   cnt
+  260:  {
+  261:    unsigned char b;
+  262:    unsigned short h;
+  263:    //  id, dlc
+  264:    wx.frame.id = 0x006 + (gv_sSC.sWX.bModNum<<4);
+  0011 ce0118   [4]             LDX   gv_sSC:280
+  0014 58       [1]             LSLX  
+  0015 49       [1]             ROLA  
+  0016 58       [1]             LSLX  
+  0017 49       [1]             ROLA  
+  0018 58       [1]             LSLX  
+  0019 49       [1]             ROLA  
+  001a 58       [1]             LSLX  
+  001b 49       [1]             ROLA  
+  001c 87       [2]             PSHA  
+  001d 8a       [3]             PULH  
+  001e af06     [2]             AIX   #6
+  0020 9f       [1]             TXA   
+  0021 8b       [2]             PSHH  
+  0022 88       [3]             PULX  
+  0023 87       [2]             PSHA  
+  0024 cd0000   [6]             JSR   _SEXT16_32
+  0027 450018   [3]             LDHX  @wx:24
+  002a cd0000   [6]             JSR   _POP32
+  265:    wx.frame.dlc = gv_sSC.sWX.bTempCount;
+  002d c6011d   [4]             LDA   gv_sSC:285
+  0030 c7001c   [4]             STA   wx:28
+  266:    //  T0~2
+  267:    for(b=0;b<gv_sSC.sWX.bTempCount;b++)      //3 is the temp resistor number for SY project 
+  0033 95       [2]             TSX   
+  0034 7f       [4]             CLR   ,X
+  0035 202f     [3]             BRA   L66 ;abs = 0066
+  0037          L37:    
+  268:    {
+  269:      h = (cal.temp[b] + 5) / 10;
+  0037 fe       [3]             LDX   ,X
+  0038 58       [1]             LSLX  
+  0039 4f       [1]             CLRA  
+  003a 49       [1]             ROLA  
+  003b 87       [2]             PSHA  
+  003c 8a       [3]             PULH  
+  003d 9ebe0054 [6]             LDHX  @cal:84,X
+  0041 af05     [2]             AIX   #5
+  0043 89       [2]             PSHX  
+  0044 8b       [2]             PSHH  
+  0045 ae0a     [2]             LDX   #10
+  0047 8c       [1]             CLRH  
+  0048 cd0000   [6]             JSR   _IDIVU_STAR08
+  004b a702     [2]             AIS   #2
+  004d 9eff02   [5]             STHX  2,SP
+  270:      if( h>0xFF ) h = 0xFF;
+  0050 95       [2]             TSX   
+  0051 6d01     [4]             TST   1,X
+  0053 2706     [3]             BEQ   L5B ;abs = 005b
+  0055 aeff     [2]             LDX   #-1
+  0057 8c       [1]             CLRH  
+  0058 9eff02   [5]             STHX  2,SP
+  005b          L5B:    
+  271:      //if((gv_sSC.sVS.bLtc6802Count == 1) && (b >= gv_sSC.sWX.bTempCount)) h = 0xFF;
+  272:      wx.frame.data[b] = (unsigned char)h; 
+  005b 95       [2]             TSX   
+  005c fe       [3]             LDX   ,X
+  005d 8c       [1]             CLRH  
+  005e 9ee603   [4]             LDA   3,SP
+  0061 d7001d   [4]             STA   @wx:29,X
+  0064 95       [2]             TSX   
+  0065 7c       [4]             INC   ,X
+  0066          L66:    
+  0066 c6011d   [4]             LDA   gv_sSC:285
+  0069 f1       [3]             CMP   ,X
+  006a 22cb     [3]             BHI   L37 ;abs = 0037
+  273:    }
+  274:    /* xmit */
+  275:    (void)can_xmit(&wx.frame);
+  006c 450018   [3]             LDHX  @wx:24
+  006f cd0000   [6]             JSR   can_xmit
+  276:    delay_ms(1);   
+  0072 ae01     [2]             LDX   #1
+  0074 8c       [1]             CLRH  
+  0075 cd0000   [6]             JSR   delay_ms
+  0078          L78:    
+  277:  }  
+  278:  
+  279:  #endif
+  280:  
+  281:  
+  282:  }
+  0078 a703     [2]             AIS   #3
+  007a 81       [6]             RTS   
+  283:  
+  284:  void Fir_pro(void){
+
+Function: Fir_pro
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\wx.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\wx.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  285:   unsigned char i;
+  286:   for(i=0;i<6;i++){
+  0001 95       [2]             TSX   
+  0002 7f       [4]             CLR   ,X
+  0003          L3:     
+  287:   if(Firdata[i]>=1000) F_index=1;
+  0003 fe       [3]             LDX   ,X
+  0004 58       [1]             LSLX  
+  0005 8c       [1]             CLRH  
+  0006 9ebe0000 [6]             LDHX  @Firdata,X
+  000a 6503e8   [3]             CPHX  #1000
+  000d 2505     [3]             BCS   L14 ;abs = 0014
+  000f a601     [2]             LDA   #1
+  0011 c70000   [4]             STA   F_index
+  0014          L14:    
+  0014 95       [2]             TSX   
+  0015 7c       [4]             INC   ,X
+  0016 f6       [3]             LDA   ,X
+  0017 a106     [2]             CMP   #6
+  0019 25e8     [3]             BCS   L3 ;abs = 0003
+  288:   }
+  289:   if(F_index){
+  001b c60000   [4]             LDA   F_index
+  001e 2720     [3]             BEQ   L40 ;abs = 0040
+  290:   wx.frame.id = 0x011 ;
+  0020 ae11     [2]             LDX   #17
+  0022 8c       [1]             CLRH  
+  0023 96001a   [5]             STHX  wx:26
+  0026 5f       [1]             CLRX  
+  0027 960018   [5]             STHX  wx:24
+  291:   wx.frame.dlc = 1;
+  002a a601     [2]             LDA   #1
+  002c c7001c   [4]             STA   wx:28
+  292:   wx.frame.data[0] = (unsigned char)11; 
+  002f a60b     [2]             LDA   #11
+  0031 c7001d   [4]             STA   wx:29
+  293:   (void)can_xmit(&wx.frame);
+  0034 450018   [3]             LDHX  @wx:24
+  0037 cd0000   [6]             JSR   can_xmit
+  294:   delay_ms(1);   
+  003a ae01     [2]             LDX   #1
+  003c 8c       [1]             CLRH  
+  003d cd0000   [6]             JSR   delay_ms
+  0040          L40:    
+  295:   }
+  296:  }
+  0040 8a       [3]             PULH  
+  0041 81       [6]             RTS   
+  297:  
+  298:  

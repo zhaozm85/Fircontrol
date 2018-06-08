@@ -1,0 +1,466 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  #include  "mcu.h"
+    2:  #include  "can.h"
+    3:  #include  "at24c.h"
+    4:  #include  "ltc6802.h"
+    5:  
+    6:  #ifndef TEST
+    7:  #define TEST  0
+    8:  #endif
+    9:  
+   10:  #ifndef TEST_EEPROM
+   11:  #define TEST_EEPROM 0
+   12:  #endif
+   13:  
+   14:  #if TEST
+   15:  unsigned char buffer[512];
+   16:  unsigned char txbuf[32];
+   17:  unsigned char rxbuf[32];
+   18:  #endif
+   19:  
+   20:  void  test_eeprom(void)
+   21:  {
+
+Function: test_eeprom
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+   22:  
+   23:  #if TEST_EEPROM
+   24:  
+   25:    int page;
+   26:    unsigned short addr, txcnt, i;
+   27:    unsigned char b;
+   28:  
+   29:    PRINTF("test_eeprom()\r\n");
+   30:  
+   31:    (void)at24c_init();
+   32:  
+   33:    /* clear leds */
+   34:    (void)pin_high(PN_LED_RED_N);
+   35:    (void)pin_high(PN_LED_GREEN_N);
+   36:    (void)pin_high(PN_LED_BLUE_N);
+   37:  
+   38:    /* write test data */
+   39:    for(addr=0,txcnt=100;addr<0x10000-txcnt;addr+=txcnt,txcnt+=10){
+   40:  
+   41:      if( txcnt>400 ) txcnt = 100;
+   42:  
+   43:      /* prepare data */
+   44:      b = (unsigned char)(addr+txcnt);
+   45:      for(i=0;i<txcnt;i++){
+   46:        buffer[i] = b-i;
+   47:      }
+   48:      
+   49:      /* write */
+   50:      (void)at24c_write(addr,buffer,txcnt);
+   51:  
+   52:    }
+   53:    
+   54:    /* read test data */
+   55:    for(addr=0,txcnt=100;addr<0x10000-txcnt;addr+=txcnt,txcnt+=10){
+   56:  
+   57:      if( txcnt>400 ) txcnt = 100;
+   58:  
+   59:      /* read */
+   60:      (void)at24c_read(addr,buffer,txcnt);
+   61:  
+   62:      /* check data */
+   63:      b = (unsigned char)(addr+txcnt);
+   64:      for(i=0;i<txcnt;i++){
+   65:        if( buffer[i] != (unsigned char)(b-i) ){
+   66:          PRINTF("[E] @ %u:%u - %02X(%02X)\r\n", addr, i, buffer[i], (unsigned char)(b-i) );
+   67:        }
+   68:      }
+   69:  
+   70:    }
+   71:    
+   72:    /* erase pages */
+   73:    for(i=0;i<128;i++) buffer[i] = 0xff;
+   74:    for(page=0;page<512;page++){
+   75:      PRINTF("e %d\r\n", page);
+   76:      (void)pin_toggle(PN_LED_GREEN_N);
+   77:  //    (void)at24c_write_page(page,buffer);
+   78:  //    (void)at24c_write(page*128,buffer,128);
+   79:    }
+   80:  
+   81:    (void)at24c_reset();
+   82:  
+   83:    for(;;)feed_watch_dog();
+   84:  
+   85:  #endif
+   86:  
+   87:  }
+  0000 81       [6]             RTS   
+   88:  
+   89:  #if TEST_MSCAN
+   90:  int mscan_rxcb(mscan_rxframe_t* f){
+   91:    (void)pin_low(PN_LED_BLUE_N);
+   92:    PRINTF("mscan rx: %08X %d\r\n", f->idr.Dword, f->dlr.MergedBits.grpDLC );
+   93:    (void)pin_high(PN_LED_BLUE_N);
+   94:    return 1;
+   95:  }
+   96:  #endif
+   97:  
+   98:  void  test_mscan(void)
+   99:  {
+
+Function: test_mscan
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  100:  #if TEST_MSCAN
+  101:  
+  102:    int i;
+  103:    mscan_config_t  cfg;
+  104:    mscan_txframe_t txf;
+  105:    
+  106:    txf.idr.Dword = 0;
+  107:    txf.dlr.MergedBits.grpDLC = 8;
+  108:  
+  109:    /* init can */
+  110:    cfg.brp = MSCAN_BRP_250K;
+  111:    cfg.idam = MSCAN_IDAM_32x2;
+  112:    for(i=0;i<8;i++){
+  113:      cfg.idar[i] = 0x00;
+  114:      cfg.idmr[i] = 0xFF; //  ignore
+  115:    }
+  116:    (void)mscan_init(&cfg);
+  117:    (void)pin_low(PN_CAN_STB);
+  118:    
+  119:    /* send can */
+  120:    dec_tick = 100;
+  121:    for(;;){
+  122:      
+  123:      /* wait cycle */
+  124:      while(dec_tick>0) feed_watch_dog();
+  125:      dec_tick = 100;
+  126:      
+  127:      /* send data */
+  128:      (void)pin_low(PN_LED_GREEN_N);
+  129:      txf.idr.Dword++;
+  130:      txf.idr.Dword |= 0x00101000;
+  131:      (void)mscan_xmit(&txf);
+  132:      (void)pin_high(PN_LED_GREEN_N);
+  133:  
+  134:    }
+  135:    
+  136:  #endif
+  137:  }
+  0000 81       [6]             RTS   
+  138:  
+  139:  #if TEST_CAN
+  140:  int can_rxcb(can_frame_t* f){
+  141:    char i;
+  142:    LED_BLUE = LED_ON;
+  143:    PRINTF("can rx: %08LX %d - ", f->id, (int)f->dlc);
+  144:    for(i=0;i<8;i++) PRINTF("%02X ", f->data[i]);
+  145:    PRINTF("\r\n");
+  146:    LED_BLUE = LED_OFF;
+  147:    return 1;
+  148:  }
+  149:  #endif
+  150:  
+  151:  void test_can(void){
+
+Function: test_can
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  152:  #if TEST_CAN
+  153:  
+  154:    can_frame_t f;
+  155:    f.id = 1;
+  156:    f.dlc = 8;
+  157:    f.data[0] = 2;
+  158:    f.data[1] = 3;
+  159:    f.data[2] = 4;
+  160:    f.data[3] = 5;
+  161:    f.data[4] = 6;
+  162:    f.data[5] = 7;
+  163:    f.data[6] = 8;
+  164:    f.data[7] = 9;
+  165:    
+  166:    /* init can */
+  167:    (void)can_init();
+  168:    
+  169:    dec_tick = 100;
+  170:    /* send can */
+  171:    for(;;){
+  172:    
+  173:      //  wait cycle
+  174:      while(dec_tick>0) feed_watch_dog();
+  175:      dec_tick = 100;
+  176:      
+  177:      //  send
+  178:      LED_GREEN = LED_ON;
+  179:      PRINTF("send can %08LX\r\n", f.id);
+  180:      (void)can_xmit(&f);
+  181:      f.id *= 3;
+  182:      f.data[0] *= 3;
+  183:      f.data[1] *= 3;
+  184:      f.data[2] *= 3;
+  185:      f.data[3] *= 3;
+  186:      f.data[4] *= 3;
+  187:      f.data[5] *= 3;
+  188:      f.data[6] *= 3;
+  189:      f.data[7] *= 3;
+  190:      LED_GREEN = LED_OFF;
+  191:      
+  192:    }
+  193:  
+  194:  #endif
+  195:  }
+  0000 81       [6]             RTS   
+  196:  
+  197:  void test_spi(void){
+
+Function: test_spi
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  198:  #if TEST_SPI
+  199:  
+  200:    int i;
+  201:    xfer_t  x;
+  202:    x.txbuf = txbuf;
+  203:    txbuf[0] = 0x80|0x01;   //  address
+  204:    x.rxbuf = rxbuf;
+  205:  
+  206:    /* init spi */
+  207:    (void)spi_init();
+  208:    
+  209:    /* enable ltc6802 */
+  210:    (void)pin_low(PN_LTC680X_ENA_N);
+  211:    
+  212:    dec_tick = 100;
+  213:    /* read spi */
+  214:    for(;;){
+  215:  
+  216:      //  wait cycle
+  217:      while(dec_tick>0) feed_watch_dog();
+  218:      dec_tick = 100;
+  219:      
+  220:      //  read
+  221:      LED_GREEN = LED_ON;
+  222:      (void)pin_low(PN_SPI_CS_N);
+  223:      delay_ms(1);
+  224:      x.txcnt = 2;
+  225:      x.rxmax = 6+1;
+  226:      x.txbuf[1] = 0x02;        //  rdcfg
+  227:      (void)spi_xfer(&x);
+  228:      delay_ms(1);
+  229:      (void)pin_high(PN_SPI_CS_N);
+  230:      PRINTF("spi rx: ");
+  231:      for(i=0;i<x.rxmax;i++) PRINTF("%02X ", x.rxbuf[i] );
+  232:      PRINTF("\r\n");
+  233:      LED_GREEN = LED_OFF;
+  234:      
+  235:      //  write
+  236:      LED_BLUE = LED_ON;
+  237:      (void)pin_low(PN_SPI_CS_N);
+  238:      delay_ms(1);
+  239:      x.txcnt = 2+6;
+  240:      x.rxmax = 0;
+  241:      x.rxbuf[0] = 0xE1;
+  242:      x.rxbuf[1] = 0x00;
+  243:      x.rxbuf[2] = 0xF0;
+  244:      x.rxbuf[3] = 0xFF;
+  245:      x.rxbuf[4] = 0x00;
+  246:      x.rxbuf[5] = 0x00;
+  247:      x.txbuf[1] = 0x01;        //  wrcfg
+  248:      for(i=0;i<6;i++) x.txbuf[2+i] = x.rxbuf[i];
+  249:      (void)spi_xfer(&x);
+  250:      delay_ms(1);
+  251:      (void)pin_high(PN_SPI_CS_N);
+  252:      PRINTF("spi tx: ");
+  253:      for(i=0;i<x.txcnt;i++) PRINTF("%02X ", x.txbuf[i] );
+  254:      PRINTF("\r\n");
+  255:      LED_BLUE = LED_OFF;
+  256:  
+  257:    }
+  258:    
+  259:  #endif
+  260:  }
+  0000 81       [6]             RTS   
+  261:  
+  262:  void test_ltc6802(void){
+
+Function: test_ltc6802
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  263:  #if TEST_LTC6802
+  264:  
+  265:    static ltc6802_cfgreg_t cfg;
+  266:    static ltc6802_cvreg_t cv;
+  267:    static ltc6802_tmpreg_t tmp;
+  268:    
+  269:    (void)ltc6802_init();
+  270:    
+  271:    dec_tick = 100;
+  272:    while(dec_tick>0);
+  273:    dec_tick = 100;
+  274:  
+  275:    cfg.cdc = 0x01;
+  276:    cfg.cell10 = 0;
+  277:    cfg.lvlpl = 0;
+  278:    cfg.gpio1 = 1;
+  279:    cfg.gpio2 = 1;
+  280:    cfg.wdt = 1;
+  281:    cfg.dcc8_1 = 0x00;
+  282:    cfg.dcc12_9 = 0x00;
+  283:    cfg.mci4_1 = 0xF;
+  284:    cfg.mci12_5 = 0xFF;
+  285:    cfg.vuv = 0x00;
+  286:    cfg.vov = 0x00;
+  287:    
+  288:    LED_BLUE = LED_ON;
+  289:    (void)pin_low(PN_SPI_CS_N);
+  290:    (void)ltc6802_wrcfg(0x01,&cfg);
+  291:    (void)pin_high(PN_SPI_CS_N);
+  292:    LED_BLUE = LED_OFF;
+  293:  
+  294:    for(;;){
+  295:    
+  296:      int i;
+  297:    
+  298:      while(dec_tick>0);
+  299:      dec_tick = 100;
+  300:  
+  301:      PRINTF("\r\nCV: ");
+  302:  
+  303:      LED_GREEN = LED_ON;
+  304:      (void)pin_low(PN_SPI_CS_N);
+  305:      (void)ltc6802_stad(0x01,LTC6802_CMD_STCVAD);
+  306:      (void)pin_high(PN_SPI_CS_N);
+  307:      LED_GREEN = LED_OFF;
+  308:      
+  309:      delay_ms(20);
+  310:  
+  311:      LED_GREEN = LED_ON;
+  312:      (void)pin_low(PN_SPI_CS_N);
+  313:      (void)ltc6802_rdcv(0x01,&cv);
+  314:      (void)pin_high(PN_SPI_CS_N);
+  315:      LED_GREEN = LED_OFF;
+  316:      for(i=0;i<6;i++){
+  317:        int volt;
+  318:        volt = (cv.group[i].c0v11_8<<8) + cv.group[i].c0v7_0;
+  319:        volt = volt + (volt+1)/2;
+  320:        PRINTF("%04d ", volt);
+  321:        volt = (cv.group[i].c1v11_4<<4) + cv.group[i].c1v3_0;
+  322:        volt = volt + (volt+1)/2;
+  323:        PRINTF("%04d ", volt);
+  324:      }
+  325:  
+  326:      PRINTF("\r\nTMP: ");
+  327:  
+  328:      LED_GREEN = LED_ON;
+  329:      (void)pin_low(PN_SPI_CS_N);
+  330:      (void)ltc6802_stad(0x01,LTC6802_CMD_STTMPAD);
+  331:      (void)pin_high(PN_SPI_CS_N);
+  332:      LED_GREEN = LED_OFF;
+  333:      
+  334:      delay_ms(20);
+  335:  
+  336:      LED_GREEN = LED_ON;
+  337:      (void)pin_low(PN_SPI_CS_N);
+  338:      (void)ltc6802_rdtmp(0x01,&tmp);
+  339:      (void)pin_high(PN_SPI_CS_N);
+  340:      LED_GREEN = LED_OFF;
+  341:  
+  342:      {
+  343:        int volt, temp;
+  344:  
+  345:        volt = (tmp.etmp1_11_8<<8)+tmp.etmp1_7_0;
+  346:        volt = volt + (volt+1)/2;
+  347:        PRINTF("%04d ", volt);
+  348:  
+  349:        volt = (tmp.etmp2_11_4<<4)+tmp.etmp2_3_0;
+  350:        volt = volt + (volt+1)/2;
+  351:        PRINTF("%04d ", volt);
+  352:  
+  353:        volt = (tmp.itmp_11_8<<8)+tmp.itmp_7_0;
+  354:        volt = volt + (volt+1)/2;
+  355:        PRINTF("%04d ", volt);
+  356:        
+  357:        temp = (volt+4)/8;      
+  358:        temp -= 273;
+  359:        PRINTF("%d", temp);
+  360:  
+  361:      }
+  362:  
+  363:  
+  364:    }
+  365:  
+  366:  #endif
+  367:  }
+  0000 81       [6]             RTS   
+  368:  
+  369:  void test_adc(void)
+  370:  {
+
+Function: test_adc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  371:  #if TEST_ADC
+  372:  
+  373:    unsigned char ch = 0;
+  374:  
+  375:    (void)adc_init();
+  376:  
+  377:    dec_tick = 10;
+  378:  
+  379:    for(;;){
+  380:  
+  381:      while(dec_tick>0);
+  382:      dec_tick = 100;
+  383:  
+  384:  //    PRINTF("---- begin adcs\r\n");    
+  385:  //    (void)adc_conv(26,5,512);
+  386:  //    (void)adc_conv(29,5,512);
+  387:  //    (void)adc_conv(14,5,512);
+  388:  //    (void)adc_conv(21,5,512);
+  389:  //    (void)adc_conv(7,5,512);
+  390:  //    (void)adc_conv(22,5,512);
+  391:  //    (void)adc_conv(15,5,512);
+  392:  //    (void)adc_conv(23,5,512);
+  393:  
+  394:      (void)adc_conv(22,5,1);
+  395:      (void)adc_conv(7,5,1);
+  396:      (void)adc_conv(22,5,1024);
+  397:      (void)adc_conv(7,5,1024);
+  398:      (void)adc_conv(22,5,10);
+  399:      (void)adc_conv(7,5,10);
+  400:      (void)adc_conv(22,5,1024);
+  401:      (void)adc_conv(7,5,1024);
+  402:      (void)adc_conv(22,5,100);
+  403:      (void)adc_conv(7,5,100);
+  404:      (void)adc_conv(22,5,1024);
+  405:      (void)adc_conv(7,5,1024);
+  406:  
+  407:    }
+  408:  
+  409:  #endif
+  410:  }
+  0000 81       [6]             RTS   
+  411:  
+  412:  void test(void){
+
+Function: test
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform\test.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\test.c.o" -WmsgSd1106
+
+  413:  #if TEST
+  414:    test_eeprom();
+  415:    test_mscan();
+  416:    test_can();
+  417:    test_spi();
+  418:    test_ltc6802();
+  419:    test_adc();
+  420:  #endif
+  421:  }
+  0000 81       [6]             RTS   
+  422:  

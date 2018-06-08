@@ -1,0 +1,679 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    TS.c
+    5:    * ver     1.0
+    6:    * brief   This is a TS file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _TS_C_  0x75
+   13:  #define FILE_No _TS_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "ts.h"  /* mandotary */
+   17:  #include  "mcu.h"
+   18:  #include  "sc.h"
+   19:  #include  "ntc.h"
+   20:  #include  "can.h"
+   21:  
+   22:  /* Private Macros & Defines --------------------------------------------------*/
+   23:  
+   24:  #define   ADP_MCU_TEMP  26
+   25:  
+   26:  #define   R0  9100  //  9.1Kohm
+   27:  
+   28:  #ifndef   TUNE_TS
+   29:  #define   TUNE_TS   0
+   30:  #endif
+   31:  
+   32:  #if TUNE_TS
+   33:  #define TS_PRINTF PRINTF
+   34:  #else
+   35:  #define TS_PRINTF empty_printf
+   36:  #endif
+   37:  
+   38:  /* Private typedefs ----------------------------------------------------------*/
+   39:  
+   40:  typedef struct
+   41:  {
+   42:    unsigned char count1;
+   43:  }
+   44:  ts_t;
+   45:  
+   46:  /* Private consts ------------------------------------------------------------*/
+   47:  
+   48:  /* Private variables ---------------------------------------------------------*/
+   49:  
+   50:  ts_t  ts;
+   51:  
+   52:  /* Private function prototypes -----------------------------------------------*/
+   53:  
+   54:  /* Global consts -------------------------------------------------------------*/
+   55:  
+   56:  /* Global variables ----------------------------------------------------------*/
+   57:  
+   58:  ts_data_t ts_data;
+   59:  
+   60:  /* Functions -----------------------------------------------------------------*/
+   61:  
+   62:  /**
+   63:    * bref    TS function
+   64:    * param   none
+   65:    * retval  none
+   66:    */
+   67:  
+   68:  static unsigned short ts_adc_to_temp(unsigned short adc, unsigned char type)
+   69:  {
+
+Function: ts_adc_to_temp
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 87       [2]             PSHA  
+  0003 a7fc     [2]             AIS   #-4
+   70:  
+   71:    long tmp;
+   72:  
+   73:    //  adjust adc
+   74:    if( adc>0xFFE ) adc = 0xFFE;
+  0005 650ffe   [3]             CPHX  #4094
+  0008 2306     [3]             BLS   L10 ;abs = 0010
+  000a 450ffe   [3]             LDHX  #4094
+  000d 9eff06   [5]             STHX  6,SP
+  0010          L10:    
+   75:  
+   76:    //  adc to res
+   77:    /*  R0   0xFFF - ADC
+   78:        -- = -----------
+   79:        Rt        ADC    */
+   80:    tmp = R0;
+  0010 45238c   [3]             LDHX  #9100
+  0013 9eff03   [5]             STHX  3,SP
+  0016 5f       [1]             CLRX  
+  0017 8c       [1]             CLRH  
+  0018 9eff01   [5]             STHX  1,SP
+   81:    tmp *= adc;
+  001b 9efe06   [5]             LDHX  6,SP
+  001e 89       [2]             PSHX  
+  001f 8b       [2]             PSHH  
+  0020 4f       [1]             CLRA  
+  0021 87       [2]             PSHA  
+  0022 87       [2]             PSHA  
+  0023 95       [2]             TSX   
+  0024 89       [2]             PSHX  
+  0025 8b       [2]             PSHH  
+  0026 af04     [2]             AIX   #4
+  0028 89       [2]             PSHX  
+  0029 8b       [2]             PSHH  
+  002a 9efe03   [5]             LDHX  3,SP
+  002d cd0000   [6]             JSR   _LMUL
+  0030 95       [2]             TSX   
+  0031 af0a     [2]             AIX   #10
+  0033 cd0000   [6]             JSR   _POP32
+   82:    tmp /= (0xFFF-adc);
+  0036 a6ff     [2]             LDA   #-1
+  0038 95       [2]             TSX   
+  0039 e00c     [3]             SUB   12,X
+  003b f7       [2]             STA   ,X
+  003c a60f     [2]             LDA   #15
+  003e e20b     [3]             SBC   11,X
+  0040 e701     [3]             STA   1,X
+  0042 5f       [1]             CLRX  
+  0043 9ee602   [4]             LDA   2,SP
+  0046 87       [2]             PSHA  
+  0047 4f       [1]             CLRA  
+  0048 87       [2]             PSHA  
+  0049 89       [2]             PSHX  
+  004a 95       [2]             TSX   
+  004b 89       [2]             PSHX  
+  004c 8b       [2]             PSHH  
+  004d af09     [2]             AIX   #9
+  004f cd0000   [6]             JSR   _LDIVS
+  0052 cd0000   [6]             JSR   _POP32
+   83:  //  if( tmp>0xFFFF ) tmp = 0xFFFF;
+   84:    TS_PRINTF("Rt: %ld; ", tmp);
+  0055 9efe0c   [5]             LDHX  12,SP
+  0058 89       [2]             PSHX  
+  0059 8b       [2]             PSHH  
+  005a 9efe0c   [5]             LDHX  12,SP
+  005d 89       [2]             PSHX  
+  005e 8b       [2]             PSHH  
+  005f 450000   [3]             LDHX  @"Rt: %ld; "
+  0062 89       [2]             PSHX  
+  0063 8b       [2]             PSHH  
+  0064 cd0000   [6]             JSR   empty_printf
+  0067 a706     [2]             AIS   #6
+   85:    
+   86:    //  res to temp
+   87:    tmp = ntc_res_to_temp(tmp,type);
+  0069 95       [2]             TSX   
+  006a e60c     [3]             LDA   12,X
+  006c 87       [2]             PSHA  
+  006d e60b     [3]             LDA   11,X
+  006f 87       [2]             PSHA  
+  0070 e60a     [3]             LDA   10,X
+  0072 87       [2]             PSHA  
+  0073 e609     [3]             LDA   9,X
+  0075 87       [2]             PSHA  
+  0076 e60d     [3]             LDA   13,X
+  0078 cd0000   [6]             JSR   ntc_res_to_temp
+  007b a704     [2]             AIS   #4
+  007d 9f       [1]             TXA   
+  007e 8b       [2]             PSHH  
+  007f 88       [3]             PULX  
+  0080 87       [2]             PSHA  
+  0081 cd0000   [6]             JSR   _SEXT16_32
+  0084 95       [2]             TSX   
+  0085 af0d     [2]             AIX   #13
+  0087 cd0000   [6]             JSR   _POP32
+   88:    TS_PRINTF("-> %ld,", tmp);
+  008a 9efe0c   [5]             LDHX  12,SP
+  008d 89       [2]             PSHX  
+  008e 8b       [2]             PSHH  
+  008f 9efe0c   [5]             LDHX  12,SP
+  0092 89       [2]             PSHX  
+  0093 8b       [2]             PSHH  
+  0094 450000   [3]             LDHX  @"-> %ld,"
+  0097 89       [2]             PSHX  
+  0098 8b       [2]             PSHH  
+  0099 cd0000   [6]             JSR   empty_printf
+  009c a706     [2]             AIS   #6
+   89:    
+   90:    if( tmp<-400 ) tmp = -400;
+  009e 95       [2]             TSX   
+  009f af09     [2]             AIX   #9
+  00a1 cd0000   [6]             JSR   _LCMP_RC
+  00a4 fffffe70         DC.L  -400
+  00a8 a709     [2]             AIS   #9
+  00aa 900c     [3]             BGE   LB8 ;abs = 00b8
+  00ac 45fe70   [3]             LDHX  #-400
+  00af 9eff03   [5]             STHX  3,SP
+  00b2 45ffff   [3]             LDHX  #-1
+  00b5 9eff01   [5]             STHX  1,SP
+  00b8          LB8:    
+   91:    tmp += 400;
+  00b8 95       [2]             TSX   
+  00b9 cd0000   [6]             JSR   _LADD_RC
+  00bc 00000190         DC.L  400
+  00c0 cd0000   [6]             JSR   _POP32
+   92:  
+   93:    return  (unsigned short)tmp;
+  00c3 9efe03   [5]             LDHX  3,SP
+   94:  
+   95:  }
+  00c6 a707     [2]             AIS   #7
+  00c8 81       [6]             RTS   
+   96:  
+   97:  static int  ts_adc_to_mcu_temp(unsigned short adc)
+   98:  {
+
+Function: ts_adc_to_mcu_temp
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 a7f4     [2]             AIS   #-12
+   99:  
+  100:    volatile signed long Vtemp, Vtemp25;
+  101:    volatile signed long tmp;
+  102:  
+  103:    Vtemp = 12207; //  1000*5000*10/4096;
+  0004 452faf   [3]             LDHX  #12207
+  0007 9eff07   [5]             STHX  7,SP
+  000a 5f       [1]             CLRX  
+  000b 8c       [1]             CLRH  
+  000c 9eff05   [5]             STHX  5,SP
+  104:    Vtemp *= adc;   //  0.1uV/bit  
+  000f 9efe0d   [5]             LDHX  13,SP
+  0012 89       [2]             PSHX  
+  0013 8b       [2]             PSHH  
+  0014 4f       [1]             CLRA  
+  0015 87       [2]             PSHA  
+  0016 87       [2]             PSHA  
+  0017 95       [2]             TSX   
+  0018 89       [2]             PSHX  
+  0019 8b       [2]             PSHH  
+  001a af08     [2]             AIX   #8
+  001c 89       [2]             PSHX  
+  001d 8b       [2]             PSHH  
+  001e 9efe03   [5]             LDHX  3,SP
+  0021 cd0000   [6]             JSR   _LMUL
+  0024 95       [2]             TSX   
+  0025 af0e     [2]             AIX   #14
+  0027 cd0000   [6]             JSR   _POP32
+  105:    Vtemp25 = 1000*10;
+  002a 452710   [3]             LDHX  #10000
+  002d 9eff09   [5]             STHX  9,SP
+  0030 5f       [1]             CLRX  
+  0031 8c       [1]             CLRH  
+  0032 9eff07   [5]             STHX  7,SP
+  106:    Vtemp25 *= gv_sSC.sTS.hVtemp25; //  0.1uV/bit
+  0035 32006d   [5]             LDHX  gv_sSC:109
+  0038 9eef01   [4]             STX   1,SP
+  003b 5f       [1]             CLRX  
+  003c 8b       [2]             PSHH  
+  003d 4f       [1]             CLRA  
+  003e 87       [2]             PSHA  
+  003f 89       [2]             PSHX  
+  0040 95       [2]             TSX   
+  0041 8b       [2]             PSHH  
+  0042 ef04     [3]             STX   4,X
+  0044 af09     [2]             AIX   #9
+  0046 89       [2]             PSHX  
+  0047 8b       [2]             PSHH  
+  0048 95       [2]             TSX   
+  0049 e602     [3]             LDA   2,X
+  004b 87       [2]             PSHA  
+  004c ee07     [3]             LDX   7,X
+  004e 8a       [3]             PULH  
+  004f cd0000   [6]             JSR   _LMUL
+  0052 95       [2]             TSX   
+  0053 af0e     [2]             AIX   #14
+  0055 cd0000   [6]             JSR   _POP32
+  107:    TS_PRINTF("(%ld-%ld), ", Vtemp, Vtemp25);
+  0058 9efe0d   [5]             LDHX  13,SP
+  005b 89       [2]             PSHX  
+  005c 8b       [2]             PSHH  
+  005d 9efe0d   [5]             LDHX  13,SP
+  0060 89       [2]             PSHX  
+  0061 8b       [2]             PSHH  
+  0062 9efe15   [5]             LDHX  21,SP
+  0065 89       [2]             PSHX  
+  0066 8b       [2]             PSHH  
+  0067 9efe15   [5]             LDHX  21,SP
+  006a 89       [2]             PSHX  
+  006b 8b       [2]             PSHH  
+  006c 450000   [3]             LDHX  @"(%ld-%ld), "
+  006f 89       [2]             PSHX  
+  0070 8b       [2]             PSHH  
+  0071 cd0000   [6]             JSR   empty_printf
+  0074 a70a     [2]             AIS   #10
+  108:    tmp = Vtemp-Vtemp25;
+  0076 95       [2]             TSX   
+  0077 af0a     [2]             AIX   #10
+  0079 89       [2]             PSHX  
+  007a 8b       [2]             PSHH  
+  007b af04     [2]             AIX   #4
+  007d cd0000   [6]             JSR   _LSUB
+  0080 af04     [2]             AIX   #4
+  0082 cd0000   [6]             JSR   _POP32
+  109:    TS_PRINTF("%ld, ", tmp);
+  0085 9efe15   [5]             LDHX  21,SP
+  0088 89       [2]             PSHX  
+  0089 8b       [2]             PSHH  
+  008a 9efe15   [5]             LDHX  21,SP
+  008d 89       [2]             PSHX  
+  008e 8b       [2]             PSHH  
+  008f 450000   [3]             LDHX  @"%ld, "
+  0092 89       [2]             PSHX  
+  0093 8b       [2]             PSHH  
+  0094 cd0000   [6]             JSR   empty_printf
+  0097 a706     [2]             AIS   #6
+  110:    if( tmp>0 ) tmp /= gv_sSC.sTS.hMCold;   //  0.1uV / (1uV/C) = 0.1C
+  0099 95       [2]             TSX   
+  009a af12     [2]             AIX   #18
+  009c cd0000   [6]             JSR   _LCMP_RC
+  009f 00000000         DC.L  0
+  00a3 a70a     [2]             AIS   #10
+  00a5 9305     [3]             BLE   LAC ;abs = 00ac
+  00a7 320071   [5]             LDHX  gv_sSC:113
+  00aa 2003     [3]             BRA   LAF ;abs = 00af
+  00ac          LAC:    
+  111:    else tmp/=gv_sSC.sTS.hMHot;
+  00ac 32006f   [5]             LDHX  gv_sSC:111
+  00af          LAF:    
+  00af 89       [2]             PSHX  
+  00b0 5f       [1]             CLRX  
+  00b1 8b       [2]             PSHH  
+  00b2 4f       [1]             CLRA  
+  00b3 87       [2]             PSHA  
+  00b4 89       [2]             PSHX  
+  00b5 95       [2]             TSX   
+  00b6 89       [2]             PSHX  
+  00b7 8b       [2]             PSHH  
+  00b8 af0c     [2]             AIX   #12
+  00ba cd0000   [6]             JSR   _LDIVS
+  00bd cd0000   [6]             JSR   _POP32
+  00c0 a704     [2]             AIS   #4
+  112:    TS_PRINTF("%ld, ", tmp);
+  00c2 9efe0b   [5]             LDHX  11,SP
+  00c5 89       [2]             PSHX  
+  00c6 8b       [2]             PSHH  
+  00c7 9efe0b   [5]             LDHX  11,SP
+  00ca 89       [2]             PSHX  
+  00cb 8b       [2]             PSHH  
+  00cc 450000   [3]             LDHX  @"%ld, "
+  00cf 89       [2]             PSHX  
+  00d0 8b       [2]             PSHH  
+  00d1 cd0000   [6]             JSR   empty_printf
+  00d4 a706     [2]             AIS   #6
+  113:    tmp = 25*10 - tmp;  //  0.1C, 0.0C~
+  00d6 95       [2]             TSX   
+  00d7 af08     [2]             AIX   #8
+  00d9 cd0000   [6]             JSR   _LSUB_LC
+  00dc 000000fa         DC.L  250
+  00e0 cd0000   [6]             JSR   _POP32
+  114:    TS_PRINTF("%ld, ", tmp);
+  00e3 9efe0b   [5]             LDHX  11,SP
+  00e6 89       [2]             PSHX  
+  00e7 8b       [2]             PSHH  
+  00e8 9efe0b   [5]             LDHX  11,SP
+  00eb 89       [2]             PSHX  
+  00ec 8b       [2]             PSHH  
+  00ed 450000   [3]             LDHX  @"%ld, "
+  00f0 89       [2]             PSHX  
+  00f1 8b       [2]             PSHH  
+  00f2 cd0000   [6]             JSR   empty_printf
+  00f5 a706     [2]             AIS   #6
+  115:    if( tmp<-400 ) tmp = -400;  //  no less than -40.0C
+  00f7 95       [2]             TSX   
+  00f8 af08     [2]             AIX   #8
+  00fa cd0000   [6]             JSR   _LCMP_RC
+  00fd fffffe70         DC.L  -400
+  0101 900c     [3]             BGE   L10F ;abs = 010f
+  0103 45fe70   [3]             LDHX  #-400
+  0106 9eff0b   [5]             STHX  11,SP
+  0109 45ffff   [3]             LDHX  #-1
+  010c 9eff09   [5]             STHX  9,SP
+  010f          L10F:   
+  116:    tmp += 400; //  -40.0C~
+  010f 95       [2]             TSX   
+  0110 af08     [2]             AIX   #8
+  0112 cd0000   [6]             JSR   _LADD_RC
+  0115 00000190         DC.L  400
+  0119 cd0000   [6]             JSR   _POP32
+  117:    
+  118:    return  (int)tmp;
+  011c 9efe0b   [5]             LDHX  11,SP
+  119:  
+  120:  }
+  011f a70e     [2]             AIS   #14
+  0121 81       [6]             RTS   
+  121:  
+  122:  static int  ts_sense(unsigned char adp)
+  123:  {
+
+Function: ts_sense
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  0000 87       [2]             PSHA  
+  0001 a7fa     [2]             AIS   #-6
+  124:  
+  125:    int res;
+  126:    can_frame_t msg;
+  127:    
+  128:    if( adp>=24 && adp!=ADP_MCU_TEMP ){
+  0003 a118     [2]             CMP   #24
+  0005 2521     [3]             BCS   L28 ;abs = 0028
+  0007 411a1e   [4]             CBEQA #26,L28 ;abs = 0028
+  129:      PERRNO(ERRNO_INVALID_PARAMETERS,adp);
+  000a ae01     [2]             LDX   #1
+  000c 8c       [1]             CLRH  
+  000d 89       [2]             PSHX  
+  000e 8b       [2]             PSHH  
+  000f ae75     [2]             LDX   #117
+  0011 89       [2]             PSHX  
+  0012 8b       [2]             PSHH  
+  0013 450000   [3]             LDHX  @"C:\Users\Administrator\Desktop\Fms\FMS\\260\302\314\25110V3T\07 Application\ts.c"
+  0016 89       [2]             PSHX  
+  0017 8b       [2]             PSHH  
+  0018 ae81     [2]             LDX   #-127
+  001a 8c       [1]             CLRH  
+  001b 89       [2]             PSHX  
+  001c 8b       [2]             PSHH  
+  001d 97       [1]             TAX   
+  001e cd0000   [6]             JSR   perrno
+  0021 a708     [2]             AIS   #8
+  130:      return  ERR;
+  0023 45fffd   [3]             LDHX  #-3
+  0026 2023     [3]             BRA   L4B ;abs = 004b
+  0028          L28:    
+  131:    }
+  132:    TS_PRINTF("ts: ");
+  0028 450000   [3]             LDHX  @"ts: "
+  002b 89       [2]             PSHX  
+  002c 8b       [2]             PSHH  
+  002d cd0000   [6]             JSR   empty_printf
+  0030 a702     [2]             AIS   #2
+  133:  
+  134:  //  DBG_PRINTF("adc\n");
+  135:    res = adc_conv(adp, gv_sSC.sTS.hAdcWaitMSecs, gv_sSC.sTS.hAdcRepeatCount);
+  0032 95       [2]             TSX   
+  0033 ee06     [3]             LDX   6,X
+  0035 89       [2]             PSHX  
+  0036 32001f   [5]             LDHX  gv_sSC:31
+  0039 89       [2]             PSHX  
+  003a 8b       [2]             PSHH  
+  003b 320021   [5]             LDHX  gv_sSC:33
+  003e cd0000   [6]             JSR   adc_conv
+  0041 a703     [2]             AIS   #3
+  0043 9eff05   [5]             STHX  5,SP
+  136:    if( res<0 ) return  res;
+  0046 9e6d05   [5]             TST   5,SP
+  0049 9002     [3]             BGE   L4D ;abs = 004d
+  004b          L4B:    
+  004b 2079     [3]             BRA   LC6 ;abs = 00c6
+  004d          L4D:    
+  137:    TS_PRINTF("%d, ", res);
+  004d 9efe05   [5]             LDHX  5,SP
+  0050 89       [2]             PSHX  
+  0051 8b       [2]             PSHH  
+  0052 9eff05   [5]             STHX  5,SP
+  0055 450000   [3]             LDHX  @"%d, "
+  0058 89       [2]             PSHX  
+  0059 8b       [2]             PSHH  
+  005a cd0000   [6]             JSR   empty_printf
+  005d a704     [2]             AIS   #4
+  138:    //msg.data[0] = (unsigned char)(res>>8);
+  139:    //msg.data[1] = (unsigned char)res;
+  140:  
+  141:  //  DBG_PRINTF("to temp\n");
+  142:    if( adp==ADP_MCU_TEMP ){
+  005f 95       [2]             TSX   
+  0060 e606     [3]             LDA   6,X
+  0062 a11a     [2]             CMP   #26
+  0064 2608     [3]             BNE   L6E ;abs = 006e
+  143:      res = ts_adc_to_mcu_temp(res);
+  0066 9efe03   [5]             LDHX  3,SP
+  0069 cd0000   [6]             JSR   ts_adc_to_mcu_temp
+  144:    }else{    
+  006c 201b     [3]             BRA   L89 ;abs = 0089
+  006e          L6E:    
+  145:      res = ts_adc_to_temp(res, gv_sSC.sTS.baSensorType[adp]);
+  006e 9efe03   [5]             LDHX  3,SP
+  0071 9ee607   [4]             LDA   7,SP
+  0074 87       [2]             PSHA  
+  0075 8b       [2]             PSHH  
+  0076 86       [3]             PULA  
+  0077 9ee702   [4]             STA   2,SP
+  007a 86       [3]             PULA  
+  007b 8c       [1]             CLRH  
+  007c 9eef02   [4]             STX   2,SP
+  007f 97       [1]             TAX   
+  0080 d60023   [4]             LDA   @gv_sSC:35,X
+  0083 9efe01   [5]             LDHX  1,SP
+  0086 cd0000   [6]             JSR   ts_adc_to_temp
+  0089          L89:    
+  0089 9eff05   [5]             STHX  5,SP
+  146:    }
+  147:    if( res<0 ) return  res;
+  008c 95       [2]             TSX   
+  008d 6d04     [4]             TST   4,X
+  008f 9132     [3]             BLT   LC3 ;abs = 00c3
+  148:    TS_PRINTF("%d\r\n", res);
+  0091 9efe05   [5]             LDHX  5,SP
+  0094 89       [2]             PSHX  
+  0095 8b       [2]             PSHH  
+  0096 9eff05   [5]             STHX  5,SP
+  0099 450000   [3]             LDHX  @"%d\015\012"
+  009c 89       [2]             PSHX  
+  009d 8b       [2]             PSHH  
+  009e cd0000   [6]             JSR   empty_printf
+  00a1 a704     [2]             AIS   #4
+  149:    //msg.data[2] = (unsigned char)(res>>8);
+  150:    //msg.data[3] = (unsigned char)res;
+  151:  
+  152:    if( adp==ADP_MCU_TEMP ) ts_data.mcu_temp = res;
+  00a3 95       [2]             TSX   
+  00a4 ee06     [3]             LDX   6,X
+  00a6 a31a     [2]             CPX   #26
+  00a8 2608     [3]             BNE   LB2 ;abs = 00b2
+  00aa 9efe03   [5]             LDHX  3,SP
+  00ad 960030   [5]             STHX  ts_data:48
+  00b0 2011     [3]             BRA   LC3 ;abs = 00c3
+  00b2          LB2:    
+  153:    else  ts_data.temp[adp] = res;
+  00b2 58       [1]             LSLX  
+  00b3 4f       [1]             CLRA  
+  00b4 49       [1]             ROLA  
+  00b5 87       [2]             PSHA  
+  00b6 9ee607   [4]             LDA   7,SP
+  00b9 8a       [3]             PULH  
+  00ba d70001   [4]             STA   @ts_data:1,X
+  00bd 9ee605   [4]             LDA   5,SP
+  00c0 d70000   [4]             STA   @ts_data,X
+  00c3          LC3:    
+  154:    
+  155:    /*msg.id = 0x700+adp;
+  156:    msg.dlc = 4;
+  157:    if( adp!=ADP_MCU_TEMP ) (void)can_xmit(&msg); */
+  158:  
+  159:    return res;
+  00c3 9efe05   [5]             LDHX  5,SP
+  00c6          LC6:    
+  160:  
+  161:  }
+  00c6 a707     [2]             AIS   #7
+  00c8 81       [6]             RTS   
+  162:  
+  163:  void ts_init(void)
+  164:  {
+
+Function: ts_init
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  165:  
+  166:    unsigned char i;
+  167:  
+  168:    ts.count1 = 0;
+  0001 4f       [1]             CLRA  
+  0002 c70000   [4]             STA   ts
+  169:    for(i=0;i<24;i++) ts_data.temp[i] = 0x8000;
+  0005 95       [2]             TSX   
+  0006 7f       [4]             CLR   ,X
+  0007          L7:     
+  0007 fe       [3]             LDX   ,X
+  0008 58       [1]             LSLX  
+  0009 4f       [1]             CLRA  
+  000a 49       [1]             ROLA  
+  000b 87       [2]             PSHA  
+  000c 8a       [3]             PULH  
+  000d 4f       [1]             CLRA  
+  000e d70001   [4]             STA   @ts_data:1,X
+  0011 a680     [2]             LDA   #-128
+  0013 d70000   [4]             STA   @ts_data,X
+  0016 95       [2]             TSX   
+  0017 7c       [4]             INC   ,X
+  0018 f6       [3]             LDA   ,X
+  0019 a118     [2]             CMP   #24
+  001b 25ea     [3]             BCS   L7 ;abs = 0007
+  170:    ts_data.mcu_temp = 0x8000;
+  001d 458000   [3]             LDHX  #-32768
+  0020 960030   [5]             STHX  ts_data:48
+  171:  
+  172:    (void)adc_init();
+  0023 cd0000   [6]             JSR   adc_init
+  173:  
+  174:  }
+  0026 8a       [3]             PULH  
+  0027 81       [6]             RTS   
+  175:  
+  176:  void ts_proc(void)
+  177:  {
+
+Function: ts_proc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  178:  
+  179:    unsigned char i;
+  180:  
+  181:    //  list 1
+  182:  //  DBG_PRINTF("lst1\n");
+  183:    if( gv_sSC.sTS.bCount1>0 ){
+  0001 c6003b   [4]             LDA   gv_sSC:59
+  0004 271a     [3]             BEQ   L20 ;abs = 0020
+  184:      (void)ts_sense( gv_sSC.sTS.baList1[ts.count1] );
+  0006 ce0000   [4]             LDX   ts
+  0009 8c       [1]             CLRH  
+  000a d6003c   [4]             LDA   @gv_sSC:60,X
+  000d cd0000   [6]             JSR   ts_sense
+  185:      ts.count1 ++;
+  0010 450000   [3]             LDHX  @ts
+  0013 7c       [4]             INC   ,X
+  186:      if( ts.count1>=gv_sSC.sTS.bCount1 ) ts.count1 = 0;
+  0014 c6003b   [4]             LDA   gv_sSC:59
+  0017 c10000   [4]             CMP   ts
+  001a 2204     [3]             BHI   L20 ;abs = 0020
+  001c 4f       [1]             CLRA  
+  001d c70000   [4]             STA   ts
+  0020          L20:    
+  187:    }
+  188:    
+  189:    //  list 2
+  190:  //  DBG_PRINTF("lst2\n");
+  191:    if( gv_sSC.sTS.bCount2>0){    
+  0020 c60054   [4]             LDA   gv_sSC:84
+  0023 2714     [3]             BEQ   L39 ;abs = 0039
+  192:      for(i=0;i<gv_sSC.sTS.bCount2;i++){
+  0025 95       [2]             TSX   
+  0026 7f       [4]             CLR   ,X
+  0027 200a     [3]             BRA   L33 ;abs = 0033
+  0029          L29:    
+  193:        (void)ts_sense( gv_sSC.sTS.baList2[i] );
+  0029 fe       [3]             LDX   ,X
+  002a 8c       [1]             CLRH  
+  002b d60055   [4]             LDA   @gv_sSC:85,X
+  002e cd0000   [6]             JSR   ts_sense
+  0031 95       [2]             TSX   
+  0032 7c       [4]             INC   ,X
+  0033          L33:    
+  0033 c60054   [4]             LDA   gv_sSC:84
+  0036 f1       [3]             CMP   ,X
+  0037 22f0     [3]             BHI   L29 ;abs = 0029
+  0039          L39:    
+  194:      }
+  195:    }
+  196:    
+  197:    //  mcu temp
+  198:  //  DBG_PRINTF("mcu\n");
+  199:    //(void)ts_sense( ADP_MCU_TEMP );
+  200:    
+  201:  }
+  0039 8a       [3]             PULH  
+  003a 81       [6]             RTS   
+  202:  
+  203:  void ts_reset(void)
+  204:  {
+
+Function: ts_reset
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\ts.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ts.c.o" -WmsgSd1106
+
+  205:    (void)adc_reset();
+  0000 cc0000   [4]             JMP   adc_reset
+  206:  }
+  207:  
+  208:  

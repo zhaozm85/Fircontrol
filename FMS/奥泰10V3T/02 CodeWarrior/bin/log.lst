@@ -1,0 +1,137 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    template.c
+    5:    * ver     1.0
+    6:    * brief   This is a template file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _LOG_C_ 0x43
+   13:  #define FILE_No _LOG_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "log.h"  /* mandotary */
+   17:  #include  "at24c.h"
+   18:  
+   19:  /* Private Macros & Defines --------------------------------------------------*/
+   20:  
+   21:  /* Private typedefs ----------------------------------------------------------*/
+   22:  
+   23:  typedef union
+   24:  {
+   25:    unsigned char array[128];
+   26:    struct{    
+   27:      unsigned int  count;
+   28:    }grouped;
+   29:  }
+   30:  log_mng_t;
+   31:  
+   32:  /* Private consts ------------------------------------------------------------*/
+   33:  
+   34:  /* Private variables ---------------------------------------------------------*/
+   35:  
+   36:  log_mng_t log_mng;
+   37:  
+   38:  /* Private function prototypes -----------------------------------------------*/
+   39:  
+   40:  /* Global consts -------------------------------------------------------------*/
+   41:  
+   42:  /* Global variables ----------------------------------------------------------*/
+   43:  
+   44:  /* Functions -----------------------------------------------------------------*/
+   45:  
+   46:  /**
+   47:    * bref    template function
+   48:    * param   none
+   49:    * retval  none
+   50:    */
+   51:  
+   52:  int log_init(void)
+   53:  {
+
+Function: log_init
+Source  : C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules\log.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\log.c.o"
+
+   54:    (void)at24c_read_page(0,log_mng.array);
+  0000 4f       [1]             CLRA  
+  0001 87       [2]             PSHA  
+  0002 87       [2]             PSHA  
+  0003 450000   [3]             LDHX  @log_mng
+  0006 cd0000   [6]             JSR   at24c_read_page
+  0009 a702     [2]             AIS   #2
+   55:    PRINTF("log cnt: %d\r\n", log_mng.grouped.count);
+  000b 320000   [5]             LDHX  log_mng
+  000e 89       [2]             PSHX  
+  000f 8b       [2]             PSHH  
+  0010 450000   [3]             LDHX  @"log cnt: %d\015\012"
+  0013 89       [2]             PSHX  
+  0014 8b       [2]             PSHH  
+  0015 cd0000   [6]             JSR   printf
+  0018 a704     [2]             AIS   #4
+   56:    return  1;
+  001a ae01     [2]             LDX   #1
+  001c 8c       [1]             CLRH  
+   57:  }
+  001d 81       [6]             RTS   
+   58:  
+   59:  int log_exit(void)
+   60:  {
+
+Function: log_exit
+Source  : C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules\log.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\log.c.o"
+
+   61:    log_mng.grouped.count ++;
+  0000 450000   [3]             LDHX  @log_mng
+  0003 6c01     [5]             INC   1,X
+  0005 2601     [3]             BNE   L8 ;abs = 0008
+  0007 7c       [4]             INC   ,X
+  0008          L8:     
+   62:    (void)at24c_write_page(0,log_mng.array);
+  0008 4f       [1]             CLRA  
+  0009 87       [2]             PSHA  
+  000a 87       [2]             PSHA  
+  000b cd0000   [6]             JSR   at24c_write_page
+  000e a702     [2]             AIS   #2
+   63:    return  1;
+  0010 ae01     [2]             LDX   #1
+  0012 8c       [1]             CLRH  
+   64:  }
+  0013 81       [6]             RTS   
+   65:  
+   66:  int log_printf(char * fmt, ...)
+   67:  {
+
+Function: log_printf
+Source  : C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules\log.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\log.c.o"
+
+   68:    (void)fmt;
+   69:    return  1;
+  0000 ae01     [2]             LDX   #1
+  0002 8c       [1]             CLRH  
+   70:  }
+  0003 81       [6]             RTS   
+   71:  
+   72:  int log_perrno(int errno, int file, int line, int param)
+   73:  {
+
+Function: log_perrno
+Source  : C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules\log.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\新建文件夹 (2)\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\log.c.o"
+
+   74:    (void)errno;
+   75:    (void)file;
+   76:    (void)line;
+   77:    (void)param;
+   78:    return  NG;
+  0000 45fffe   [3]             LDHX  #-2
+   79:  }
+  0003 81       [6]             RTS   
+   80:  

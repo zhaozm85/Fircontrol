@@ -1,0 +1,972 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    *****************************************************************************
+    3:    * proj    BMU_HM
+    4:    * file    pi.c
+    5:    * ver     1.0
+    6:    * brief   产品信息
+    7:    -----------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id ------------------------------------------------------------------*/
+   12:  /* 源文件标识 ---------------------------------------------------------------*/
+   13:  #define _PI_C_  0x79
+   14:  #define FILE_No _PI_C_
+   15:  
+   16:  /* Includes -----------------------------------------------------------------*/
+   17:  /* 本源文件涉及的头文件 -----------------------------------------------------*/
+   18:  
+   19:  #include  "pi.h"  /* 强制引用与本源文件对应的头文件 */
+   20:  #include  "at24c.h"
+   21:  #include  "mcu.h"
+   22:  
+   23:  /* Local Macros & Defines ---------------------------------------------------*/
+   24:  /* 本地宏定义 ---------------------------------------------------------------*/
+   25:  
+   26:  #define   PI_MAGIC_CODE         0x55AA
+   27:  #define   PI_ADDRESS_IN_EEPROM  0x0000
+   28:  #define   PI_UPDATE_COUNT_MAX   50000
+   29:  
+   30:  /* Local typedefs -----------------------------------------------------------*/
+   31:  /* 本地类型定义 -------------------------------------------------------------*/
+   32:  
+   33:  /* 基本类型，用于操作控制 */
+   34:  typedef struct
+   35:  {
+   36:    union {
+   37:      unsigned char bAll;
+   38:      struct{
+   39:        unsigned  Loaded:1;
+   40:        unsigned  Checked:1;
+   41:        unsigned  Unlocked:1;
+   42:      }sFlag;
+   43:    }uFlag;
+   44:  }
+   45:  lt_sPI;
+   46:  
+   47:  /* Local consts -------------------------------------------------------------*/
+   48:  /* 本地常量定义 -------------------------------------------------------------*/
+   49:  
+   50:  /* 产品信息的默认初值 */
+   51:  const gt_sPI  lc_sPIDefault = {
+   52:    {
+   53:      sizeof(gt_sPI),
+   54:      PI_MAGIC_CODE,
+   55:      0,
+   56:      0,
+   57:      0,
+   58:      0,
+   59:      0,
+   60:    },
+   61:    { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF  } // 产品序列号
+   62:  };
+   63:  
+   64:  /* Local variables ----------------------------------------------------------*/
+   65:  /* 本地变量定义 -------------------------------------------------------------*/
+   66:  
+   67:  /* 用于操作控制 */
+   68:  lt_sPI  lv_sPI;
+   69:  
+   70:  /* Global consts ------------------------------------------------------------*/
+   71:  /* 全局常量定义 -------------------------------------------------------------*/
+   72:  
+   73:  /* Global variables ---------------------------------------------------------*/
+   74:  /* 全局变量定义 -------------------------------------------------------------*/
+   75:  
+   76:  gt_sPI  gv_sPI;
+   77:  
+   78:  /* Local functions ----------------------------------------------------------*/
+   79:  /* 本地函数实现 -------------------------------------------------------------*/
+   80:  
+   81:  /**
+   82:    * name    lf_nPILoad
+   83:    * bref    将产品信息从EEPROM中载入到RAM中
+   84:    * param   none
+   85:    * retval  none
+   86:    */
+   87:  static int lf_nPILoad(void)
+   88:  {
+
+Function: lf_nPILoad
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+   89:  #if 0  
+   90:    int res;
+   91:  
+   92:    /* 打开EEPROM */
+   93:    res = at24c_init();
+   94:    if( res!=OK ) return res;
+   95:    
+   96:    /* 读取EEPROM */
+   97:    res = at24c_read(PI_ADDRESS_IN_EEPROM,(void*)&gv_sPI,sizeof(gv_sPI));
+   98:    if( res!=OK ) return res;
+   99:    
+  100:    /* 关闭EEPROM */
+  101:    res = at24c_reset();
+  102:    if( res!=OK ) return res;
+  103:  #else
+  104:    gv_sPI = lc_sPIDefault;
+  0000 450000   [3]             LDHX  @gv_sPI
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 450000   [3]             LDHX  @lc_sPIDefault
+  0008 a618     [2]             LDA   #24
+  000a cd0000   [6]             JSR   _COPY
+  105:  #endif
+  106:    
+  107:    /* 完成 */
+  108:    lv_sPI.uFlag.sFlag.Loaded = 1;
+  000d 450000   [3]             LDHX  @lv_sPI
+  0010 f6       [3]             LDA   ,X
+  0011 aa01     [2]             ORA   #1
+  0013 f7       [2]             STA   ,X
+  109:    return  OK;
+  0014 ae01     [2]             LDX   #1
+  0016 8c       [1]             CLRH  
+  110:  }
+  0017 81       [6]             RTS   
+  111:  
+  112:  /**
+  113:    * name    lf_nPICheck
+  114:    * bref    检查RAM中的产品信息是否有效
+  115:    * param   none
+  116:    * retval  none
+  117:    */
+  118:  int lf_nPICheck(void)
+  119:  {
+
+Function: lf_nPICheck
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  0000 a7fb     [2]             AIS   #-5
+  120:  
+  121:    /* Length */
+  122:    if( gv_sPI.sHead.hLength==0 || gv_sPI.sHead.hLength==0xFFFF ){
+  0002 320000   [5]             LDHX  gv_sPI
+  0005 2708     [3]             BEQ   LF ;abs = 000f
+  0007 320000   [5]             LDHX  gv_sPI
+  000a 65ffff   [3]             CPHX  #-1
+  000d 260a     [3]             BNE   L19 ;abs = 0019
+  000f          LF:     
+  123:      DBG_PRINTF(" ***NG*** Invalid sHead.hLength: %Xh\r\n", gv_sPI.sHead.hLength);
+  000f 320000   [5]             LDHX  gv_sPI
+  0012 89       [2]             PSHX  
+  0013 8b       [2]             PSHH  
+  0014 450000   [3]             LDHX  @" ***NG*** Invalid sHead.hLength: %Xh\015\012"
+  124:      return  NG;
+  0017 206f     [3]             BRA   L88 ;abs = 0088
+  0019          L19:    
+  125:    }
+  126:  
+  127:    /* MAGIC CODE */
+  128:    if( gv_sPI.sHead.hMagicCode!=PI_MAGIC_CODE ){
+  0019 320002   [5]             LDHX  gv_sPI:2
+  001c 6555aa   [3]             CPHX  #21930
+  001f 270a     [3]             BEQ   L2B ;abs = 002b
+  129:      DBG_PRINTF(" ***NG*** Invalid Magic Code : %Xh\r\n", gv_sPI.sHead.hMagicCode);
+  0021 320002   [5]             LDHX  gv_sPI:2
+  0024 89       [2]             PSHX  
+  0025 8b       [2]             PSHH  
+  0026 450000   [3]             LDHX  @" ***NG*** Invalid Magic Code : %Xh\015\012"
+  130:      return NG;
+  0029 205d     [3]             BRA   L88 ;abs = 0088
+  002b          L2B:    
+  131:    }
+  132:  
+  133:    /* CSEven, CSOdd */
+  134:    {
+  135:      unsigned char cs;
+  136:      unsigned short i;
+  137:      unsigned char * p;
+  138:      p = (unsigned char *)&gv_sPI;
+  002b 450000   [3]             LDHX  @gv_sPI
+  002e 9eff04   [5]             STHX  4,SP
+  139:      /* CSEven */
+  140:      for(cs=0,i=0;i<gv_sPI.sHead.hLength;i+=2){
+  0031 95       [2]             TSX   
+  0032 6f02     [5]             CLR   2,X
+  0034 6f01     [5]             CLR   1,X
+  0036 7f       [4]             CLR   ,X
+  0037 200e     [3]             BRA   L47 ;abs = 0047
+  0039          L39:    
+  0039 ad66     [5]             BSR   LA1 ;abs = 00a1
+  141:        cs += p[i];
+  003b fb       [3]             ADD   ,X
+  003c 95       [2]             TSX   
+  003d e702     [3]             STA   2,X
+  003f 9efe01   [5]             LDHX  1,SP
+  0042 af02     [2]             AIX   #2
+  0044 9eff01   [5]             STHX  1,SP
+  0047          L47:    
+  0047 320000   [5]             LDHX  gv_sPI
+  004a 9ef301   [6]             CPHX  1,SP
+  004d 22ea     [3]             BHI   L39 ;abs = 0039
+  142:  //      DBG_PRINTF("%02X,",p[i]);
+  143:      }
+  144:      if( cs!=0 ){
+  004f 95       [2]             TSX   
+  0050 6d02     [4]             TST   2,X
+  0052 270a     [3]             BEQ   L5E ;abs = 005e
+  145:        DBG_PRINTF(" ***NG*** CSEven failed: %Xh\r\n", cs);
+  0054 e602     [3]             LDA   2,X
+  0056 87       [2]             PSHA  
+  0057 4f       [1]             CLRA  
+  0058 87       [2]             PSHA  
+  0059 450000   [3]             LDHX  @" ***NG*** CSEven failed: %Xh\015\012"
+  146:        return  NG;
+  005c 202a     [3]             BRA   L88 ;abs = 0088
+  005e          L5E:    
+  147:      }
+  148:      /* CSOdd */
+  149:      for(cs=0,i=1;i<gv_sPI.sHead.hLength;i+=2){
+  005e 6f02     [5]             CLR   2,X
+  0060 ae01     [2]             LDX   #1
+  0062 8c       [1]             CLRH  
+  0063 200b     [3]             BRA   L70 ;abs = 0070
+  0065          L65:    
+  0065 ad3a     [5]             BSR   LA1 ;abs = 00a1
+  150:        cs += p[i];
+  0067 fb       [3]             ADD   ,X
+  0068 95       [2]             TSX   
+  0069 e702     [3]             STA   2,X
+  006b 9efe01   [5]             LDHX  1,SP
+  006e af02     [2]             AIX   #2
+  0070          L70:    
+  0070 9eff01   [5]             STHX  1,SP
+  0073 320000   [5]             LDHX  gv_sPI
+  0076 9ef301   [6]             CPHX  1,SP
+  0079 22ea     [3]             BHI   L65 ;abs = 0065
+  151:  //      DBG_PRINTF("%02X,",p[i]);
+  152:      }
+  153:      if( cs!=0 ){
+  007b 95       [2]             TSX   
+  007c 6d02     [4]             TST   2,X
+  007e 2714     [3]             BEQ   L94 ;abs = 0094
+  154:        DBG_PRINTF(" ***NG*** CSOdd failed: %Xh\r\n", cs);
+  0080 e602     [3]             LDA   2,X
+  0082 87       [2]             PSHA  
+  0083 4f       [1]             CLRA  
+  0084 87       [2]             PSHA  
+  0085 450000   [3]             LDHX  @" ***NG*** CSOdd failed: %Xh\015\012"
+  0088          L88:    
+  0088 89       [2]             PSHX  
+  0089 8b       [2]             PSHH  
+  008a cd0000   [6]             JSR   printf
+  008d a704     [2]             AIS   #4
+  155:        return  NG;
+  008f 45fffe   [3]             LDHX  #-2
+  0092 200a     [3]             BRA   L9E ;abs = 009e
+  0094          L94:    
+  156:      }
+  157:    }
+  158:  
+  159:    /* 通过 */
+  160:    lv_sPI.uFlag.sFlag.Checked = 1;
+  0094 450000   [3]             LDHX  @lv_sPI
+  0097 f6       [3]             LDA   ,X
+  0098 aa02     [2]             ORA   #2
+  009a f7       [2]             STA   ,X
+  161:    return  OK;
+  009b ae01     [2]             LDX   #1
+  009d 8c       [1]             CLRH  
+  009e          L9E:    
+  162:  }
+  009e a705     [2]             AIS   #5
+  00a0 81       [6]             RTS   
+  00a1          LA1:    
+  00a1 95       [2]             TSX   
+  00a2 e606     [3]             LDA   6,X
+  00a4 eb03     [3]             ADD   3,X
+  00a6 87       [2]             PSHA  
+  00a7 e602     [3]             LDA   2,X
+  00a9 e905     [3]             ADC   5,X
+  00ab 87       [2]             PSHA  
+  00ac e604     [3]             LDA   4,X
+  00ae 8a       [3]             PULH  
+  00af 88       [3]             PULX  
+  00b0 81       [6]             RTS   
+  163:  
+  164:  /**
+  165:    * name    lf_nPIUnlock
+  166:    * bref    匹配解锁，允许修改
+  167:    * param   none
+  168:    * retval  none
+  169:    */
+  170:  static int lf_nPIUnlock(unsigned char key)
+  171:  {
+
+Function: lf_nPIUnlock
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  0000 87       [2]             PSHA  
+  0001 a7fe     [2]             AIS   #-2
+  172:    int i;
+  173:  
+  174:    /* 匹配 */
+  175:    for(i=0;i<8;i++) key += gv_sPI.baSN[i];
+  0003 95       [2]             TSX   
+  0004 6f01     [5]             CLR   1,X
+  0006 7f       [4]             CLR   ,X
+  0007          L7:     
+  0007 95       [2]             TSX   
+  0008 ee01     [3]             LDX   1,X
+  000a 8c       [1]             CLRH  
+  000b 9ee603   [4]             LDA   3,SP
+  000e db0010   [4]             ADD   @gv_sPI:16,X
+  0011 95       [2]             TSX   
+  0012 e702     [3]             STA   2,X
+  0014 6c01     [5]             INC   1,X
+  0016 2601     [3]             BNE   L19 ;abs = 0019
+  0018 7c       [4]             INC   ,X
+  0019          L19:    
+  0019 9efe01   [5]             LDHX  1,SP
+  001c 650008   [3]             CPHX  #8
+  001f 91e6     [3]             BLT   L7 ;abs = 0007
+  176:    if( key!=0 ){
+  0021 95       [2]             TSX   
+  0022 6d02     [4]             TST   2,X
+  0024 2712     [3]             BEQ   L38 ;abs = 0038
+  177:      DBG_PRINTF(" ***NG*** Unmatched Key: %Xh\r\n", key);
+  0026 87       [2]             PSHA  
+  0027 4f       [1]             CLRA  
+  0028 87       [2]             PSHA  
+  0029 450000   [3]             LDHX  @" ***NG*** Unmatched Key: %Xh\015\012"
+  002c 89       [2]             PSHX  
+  002d 8b       [2]             PSHH  
+  002e cd0000   [6]             JSR   printf
+  0031 a704     [2]             AIS   #4
+  178:      return NG;
+  0033 45fffe   [3]             LDHX  #-2
+  0036 200a     [3]             BRA   L42 ;abs = 0042
+  0038          L38:    
+  179:    }
+  180:  
+  181:    /* 通过 */
+  182:    lv_sPI.uFlag.sFlag.Unlocked = 1;
+  0038 450000   [3]             LDHX  @lv_sPI
+  003b f6       [3]             LDA   ,X
+  003c aa04     [2]             ORA   #4
+  003e f7       [2]             STA   ,X
+  183:    return  OK;
+  003f ae01     [2]             LDX   #1
+  0041 8c       [1]             CLRH  
+  0042          L42:    
+  184:  }
+  0042 a703     [2]             AIS   #3
+  0044 81       [6]             RTS   
+  185:  
+  186:  /**
+  187:    * name    lf_nPIUpdate
+  188:    * bref    更新产品信息的时间和次数
+  189:    * param   none
+  190:    * retval  none
+  191:    */
+  192:  static int lf_nPIUpdate(void)
+  193:  {
+
+Function: lf_nPIUpdate
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  0000 a7fb     [2]             AIS   #-5
+  194:    /* 更新时间 */
+  195:    DisableInterrupts;
+  0002 9b       [1]             SEI   
+  196:    gv_sPI.sHead.wUpdateTime = rtc_sec;
+  0003 320002   [5]             LDHX  rtc_sec:2
+  0006 96000a   [5]             STHX  gv_sPI:10
+  0009 320000   [5]             LDHX  rtc_sec
+  000c 960008   [5]             STHX  gv_sPI:8
+  197:    EnableInterrupts;
+  000f 9a       [1]             CLI   
+  198:    
+  199:    /* 更新次数 */
+  200:    if( gv_sPI.sHead.hUpdateCount>=PI_UPDATE_COUNT_MAX ){
+  0010 32000c   [5]             LDHX  gv_sPI:12
+  0013 65c350   [3]             CPHX  #-15536
+  0016 2510     [3]             BCS   L28 ;abs = 0028
+  201:      DBG_PRINTF(" ***NG*** Update Count Outbreak Limit\r\n");
+  0018 450000   [3]             LDHX  @" ***NG*** Update Count Outbreak Limit\015\012"
+  001b 89       [2]             PSHX  
+  001c 8b       [2]             PSHH  
+  001d cd0000   [6]             JSR   printf
+  0020 a702     [2]             AIS   #2
+  202:      return  NG;
+  0022 45fffe   [3]             LDHX  #-2
+  0025 cc00d2   [4]             JMP   LD2 ;abs = 00d2
+  0028          L28:    
+  203:    }
+  204:    gv_sPI.sHead.hUpdateCount ++;
+  0028 45000c   [3]             LDHX  @gv_sPI:12
+  002b 6c01     [5]             INC   1,X
+  002d 2601     [3]             BNE   L30 ;abs = 0030
+  002f 7c       [4]             INC   ,X
+  0030          L30:    
+  205:    
+  206:    /* 创建时间 */
+  207:    if( gv_sPI.sHead.hUpdateCount==1 ){
+  0030 32000c   [5]             LDHX  gv_sPI:12
+  0033 650001   [3]             CPHX  #1
+  0036 260c     [3]             BNE   L44 ;abs = 0044
+  208:      gv_sPI.sHead.wCreateTime = gv_sPI.sHead.wUpdateTime;
+  0038 32000a   [5]             LDHX  gv_sPI:10
+  003b 960006   [5]             STHX  gv_sPI:6
+  003e 320008   [5]             LDHX  gv_sPI:8
+  0041 960004   [5]             STHX  gv_sPI:4
+  0044          L44:    
+  209:    }
+  210:  
+  211:    /* CS */
+  212:    {
+  213:      unsigned char cs;
+  214:      unsigned short i;
+  215:      unsigned char * p;
+  216:      p = (unsigned char *)&gv_sPI;
+  0044 450000   [3]             LDHX  @gv_sPI
+  0047 9eff04   [5]             STHX  4,SP
+  217:      gv_sPI.sHead.bCSEven = 0;
+  004a 4f       [1]             CLRA  
+  004b c7000e   [4]             STA   gv_sPI:14
+  218:      gv_sPI.sHead.bCSOdd = 0;
+  004e c7000f   [4]             STA   gv_sPI:15
+  219:      /* CSEven */
+  220:      for(cs=0,i=0;i<gv_sPI.sHead.hLength;i+=2){
+  0051 95       [2]             TSX   
+  0052 6f02     [5]             CLR   2,X
+  0054 6f01     [5]             CLR   1,X
+  0056 7f       [4]             CLR   ,X
+  0057 201c     [3]             BRA   L75 ;abs = 0075
+  0059          L59:    
+  0059 ad7a     [5]             BSR   LD5 ;abs = 00d5
+  221:        cs -= p[i];
+  005b f0       [3]             SUB   ,X
+  005c 9ee703   [4]             STA   3,SP
+  222:        DBG_PRINTF("%02X,",p[i]);
+  005f f6       [3]             LDA   ,X
+  0060 87       [2]             PSHA  
+  0061 4f       [1]             CLRA  
+  0062 87       [2]             PSHA  
+  0063 450000   [3]             LDHX  @"%02X,"
+  0066 89       [2]             PSHX  
+  0067 8b       [2]             PSHH  
+  0068 cd0000   [6]             JSR   printf
+  006b a704     [2]             AIS   #4
+  006d 9efe01   [5]             LDHX  1,SP
+  0070 af02     [2]             AIX   #2
+  0072 9eff01   [5]             STHX  1,SP
+  0075          L75:    
+  0075 320000   [5]             LDHX  gv_sPI
+  0078 9ef301   [6]             CPHX  1,SP
+  007b 22dc     [3]             BHI   L59 ;abs = 0059
+  223:      }
+  224:      gv_sPI.sHead.bCSEven = cs;
+  007d 95       [2]             TSX   
+  007e e602     [3]             LDA   2,X
+  0080 c7000e   [4]             STA   gv_sPI:14
+  225:      DBG_PRINTF(" - CSEven: %Xh\r\n", cs);
+  0083 87       [2]             PSHA  
+  0084 4f       [1]             CLRA  
+  0085 87       [2]             PSHA  
+  0086 450000   [3]             LDHX  @" - CSEven: %Xh\015\012"
+  0089 89       [2]             PSHX  
+  008a 8b       [2]             PSHH  
+  008b cd0000   [6]             JSR   printf
+  008e a704     [2]             AIS   #4
+  226:      /* CSOdd */
+  227:      for(cs=0,i=1;i<gv_sPI.sHead.hLength;i+=2){
+  0090 95       [2]             TSX   
+  0091 6f02     [5]             CLR   2,X
+  0093 ae01     [2]             LDX   #1
+  0095 8c       [1]             CLRH  
+  0096 2019     [3]             BRA   LB1 ;abs = 00b1
+  0098          L98:    
+  0098 ad3b     [5]             BSR   LD5 ;abs = 00d5
+  228:        cs -= p[i];
+  009a f0       [3]             SUB   ,X
+  009b 9ee703   [4]             STA   3,SP
+  229:        DBG_PRINTF("%02X,",p[i]);
+  009e f6       [3]             LDA   ,X
+  009f 87       [2]             PSHA  
+  00a0 4f       [1]             CLRA  
+  00a1 87       [2]             PSHA  
+  00a2 450000   [3]             LDHX  @"%02X,"
+  00a5 89       [2]             PSHX  
+  00a6 8b       [2]             PSHH  
+  00a7 cd0000   [6]             JSR   printf
+  00aa a704     [2]             AIS   #4
+  00ac 9efe01   [5]             LDHX  1,SP
+  00af af02     [2]             AIX   #2
+  00b1          LB1:    
+  00b1 9eff01   [5]             STHX  1,SP
+  00b4 320000   [5]             LDHX  gv_sPI
+  00b7 9ef301   [6]             CPHX  1,SP
+  00ba 22dc     [3]             BHI   L98 ;abs = 0098
+  230:      }
+  231:      gv_sPI.sHead.bCSOdd = cs;
+  00bc 95       [2]             TSX   
+  00bd e602     [3]             LDA   2,X
+  00bf c7000f   [4]             STA   gv_sPI:15
+  232:      DBG_PRINTF(" - CSOdd: %Xh\r\n", cs);
+  00c2 87       [2]             PSHA  
+  00c3 4f       [1]             CLRA  
+  00c4 87       [2]             PSHA  
+  00c5 450000   [3]             LDHX  @" - CSOdd: %Xh\015\012"
+  00c8 89       [2]             PSHX  
+  00c9 8b       [2]             PSHH  
+  00ca cd0000   [6]             JSR   printf
+  00cd a704     [2]             AIS   #4
+  233:    }
+  234:  
+  235:    /* 完成 */
+  236:    return  OK;
+  00cf ae01     [2]             LDX   #1
+  00d1 8c       [1]             CLRH  
+  00d2          LD2:    
+  237:  }
+  00d2 a705     [2]             AIS   #5
+  00d4 81       [6]             RTS   
+  00d5          LD5:    
+  00d5 95       [2]             TSX   
+  00d6 e606     [3]             LDA   6,X
+  00d8 eb03     [3]             ADD   3,X
+  00da 87       [2]             PSHA  
+  00db e602     [3]             LDA   2,X
+  00dd e905     [3]             ADC   5,X
+  00df 87       [2]             PSHA  
+  00e0 e604     [3]             LDA   4,X
+  00e2 8a       [3]             PULH  
+  00e3 88       [3]             PULX  
+  00e4 81       [6]             RTS   
+  238:  
+  239:  /**
+  240:    * name    lf_nPISave
+  241:    * bref    将RAM中的产品信息保存到EEPROM中
+  242:    * param   none
+  243:    * retval  none
+  244:    */
+  245:  static int lf_nPISave(void)
+  246:  {
+
+Function: lf_nPISave
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  247:    int res;
+  248:    
+  249:    /* 打开EEPROM */
+  250:    res = at24c_init();
+  0000 cd0000   [6]             JSR   at24c_init
+  251:    if( res!=OK ) return res;
+  0003 650001   [3]             CPHX  #1
+  0006 2618     [3]             BNE   L20 ;abs = 0020
+  252:    
+  253:    /* 写入EEPROM */
+  254:    res = at24c_write(PI_ADDRESS_IN_EEPROM,(void*)&gv_sPI,sizeof(gv_sPI));
+  0008 4f       [1]             CLRA  
+  0009 87       [2]             PSHA  
+  000a 87       [2]             PSHA  
+  000b 450000   [3]             LDHX  @gv_sPI
+  000e 89       [2]             PSHX  
+  000f 8b       [2]             PSHH  
+  0010 ae18     [2]             LDX   #24
+  0012 8c       [1]             CLRH  
+  0013 cd0000   [6]             JSR   at24c_write
+  0016 a704     [2]             AIS   #4
+  255:    if( res!=OK ) return res;
+  0018 650001   [3]             CPHX  #1
+  001b 2603     [3]             BNE   L20 ;abs = 0020
+  256:    
+  257:    /* 关闭EEPROM */
+  258:    res = at24c_reset();
+  001d cc0000   [4]             JMP   at24c_reset
+  0020          L20:    
+  259:    if( res!=OK ) return res;
+  260:    
+  261:    /* 完成 */
+  262:    return  OK;
+  263:  }
+  0020 81       [6]             RTS   
+  264:  
+  265:  /* Global functions ---------------------------------------------------------*/
+  266:  /* 全局函数实现 -------------------------------------------------------------*/
+  267:  
+  268:  /**
+  269:    * name    gf_nPIInit
+  270:    * bref    初始化
+  271:    * param   none
+  272:    * retval  none
+  273:    */
+  274:  int gf_nPIInit(void)
+  275:  {
+
+Function: gf_nPIInit
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  276:    DBG_PRINTF("gf_nPIInit()\r\n");
+  0000 450000   [3]             LDHX  @"gf_nPIInit()\015\012"
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 cd0000   [6]             JSR   printf
+  0008 a702     [2]             AIS   #2
+  277:  
+  278:    /* 初始化 */
+  279:    lv_sPI.uFlag.bAll = 0;
+  000a 4f       [1]             CLRA  
+  000b c70000   [4]             STA   lv_sPI
+  280:    /* 完成 */
+  281:    return  OK;
+  000e ae01     [2]             LDX   #1
+  0010 8c       [1]             CLRH  
+  282:  }
+  0011 81       [6]             RTS   
+  283:  
+  284:  /**
+  285:    * name    gf_nPILoad
+  286:    * bref    将产品信息从EEPROM中载入到RAM中
+  287:    * param   none
+  288:    * retval  none
+  289:    */
+  290:  int gf_nPILoad(void)
+  291:  {
+
+Function: gf_nPILoad
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  292:    int res;
+  293:    DBG_PRINTF("gf_nPILoad()\r\n");
+  0000 450000   [3]             LDHX  @"gf_nPILoad()\015\012"
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 cd0000   [6]             JSR   printf
+  0008 a702     [2]             AIS   #2
+  294:    
+  295:    /* 从EEPROM中载入产品信息 */
+  296:    res = lf_nPILoad(); if( res!=OK ) return res;
+  000a cd0000   [6]             JSR   lf_nPILoad
+  000d 650001   [3]             CPHX  #1
+  0010 2612     [3]             BNE   L24 ;abs = 0024
+  297:  #if 0
+  298:    /* 如果EEPROM中没有产品信息，则需要初始化 */
+  299:    if( lf_nPICheck()==NG ){  
+  300:      /* 设置初始值 */
+  301:      gv_sPI = lc_sPIDefault;
+  302:      /* 更新 */
+  303:      res = lf_nPIUpdate(); if( res!=OK ) return res;
+  304:      /* 保存到EEPROM */
+  305:      res = lf_nPISave(); if( res!=OK ) return res;
+  306:      /* 完成 */
+  307:      DBG_PRINTF(" - OK: PI Set Default\r\n");
+  308:      /* 利用看门狗重启 */    
+  309:      for(;;);
+  310:    }
+  311:  
+  312:    /* 如果SN是全0xFF，则自动解锁 */
+  313:    {
+  314:      unsigned char i;
+  315:      for(i=0;i<8;i++){
+  316:        if( gv_sPI.baSN[i]==0xFF ) continue;
+  317:        break;
+  318:      }
+  319:      if(i==8 ){
+  320:        lv_sPI.uFlag.sFlag.Unlocked = 1;
+  321:        DBG_PRINTF(" - PI Auto Unlocked\r\n");
+  322:      }
+  323:    }
+  324:  #endif
+  325:    /* 完成 */
+  326:    DBG_PRINTF(" - OK: PI Loaded: %d\r\n", gv_sPI.sHead.hUpdateCount);
+  0012 32000c   [5]             LDHX  gv_sPI:12
+  0015 89       [2]             PSHX  
+  0016 8b       [2]             PSHH  
+  0017 450000   [3]             LDHX  @" - OK: PI Loaded: %d\015\012"
+  001a 89       [2]             PSHX  
+  001b 8b       [2]             PSHH  
+  001c cd0000   [6]             JSR   printf
+  001f a704     [2]             AIS   #4
+  327:    return  OK;
+  0021 ae01     [2]             LDX   #1
+  0023 8c       [1]             CLRH  
+  0024          L24:    
+  328:  }
+  0024 81       [6]             RTS   
+  329:  
+  330:  /**
+  331:    * name    gf_nPIUnlock
+  332:    * bref    将产品信息解锁
+  333:    * param   none
+  334:    * retval  none
+  335:    */
+  336:  int gf_nPIUnlock(unsigned char key)
+  337:  {
+
+Function: gf_nPIUnlock
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  0000 87       [2]             PSHA  
+  338:    int res;
+  339:    DBG_PRINTF("gf_nPIUnlock(%Xh)\r\n", key);
+  0001 87       [2]             PSHA  
+  0002 5f       [1]             CLRX  
+  0003 89       [2]             PSHX  
+  0004 450000   [3]             LDHX  @"gf_nPIUnlock(%Xh)\015\012"
+  0007 89       [2]             PSHX  
+  0008 8b       [2]             PSHH  
+  0009 cd0000   [6]             JSR   printf
+  000c a704     [2]             AIS   #4
+  340:  
+  341:    /* 未载入时不能操作 */
+  342:    if( lv_sPI.uFlag.sFlag.Loaded==0 ){
+  000e c60000   [4]             LDA   lv_sPI
+  0011 a501     [2]             BIT   #1
+  0013 2605     [3]             BNE   L1A ;abs = 001a
+  343:      DBG_PRINTF(" ***NG*** PI Not Loaded\r\n");
+  0015 450000   [3]             LDHX  @" ***NG*** PI Not Loaded\015\012"
+  344:      return NG;
+  0018 2007     [3]             BRA   L21 ;abs = 0021
+  001a          L1A:    
+  345:    }
+  346:    
+  347:    /* 检验未通过不能操作 */
+  348:    if( lv_sPI.uFlag.sFlag.Checked==0 ){
+  001a a502     [2]             BIT   #2
+  001c 260f     [3]             BNE   L2D ;abs = 002d
+  349:      DBG_PRINTF(" ***NG*** PI Not Checked\r\n");
+  001e 450000   [3]             LDHX  @" ***NG*** PI Not Checked\015\012"
+  0021          L21:    
+  0021 89       [2]             PSHX  
+  0022 8b       [2]             PSHH  
+  0023 cd0000   [6]             JSR   printf
+  0026 a702     [2]             AIS   #2
+  350:      return  NG;
+  0028 45fffe   [3]             LDHX  #-2
+  351:    }
+  352:    
+  353:    /* 解锁 */
+  354:    res = lf_nPIUnlock(key);
+  355:    if( res!=OK ) return res;
+  356:    
+  357:    /* 完成 */
+  358:    DBG_PRINTF(" - OK: PI Unlocked\r\n");
+  359:    return  OK;
+  360:  }
+  002b 86       [3]             PULA  
+  002c 81       [6]             RTS   
+  002d          L2D:    
+  002d 95       [2]             TSX   
+  002e f6       [3]             LDA   ,X
+  002f cd0000   [6]             JSR   lf_nPIUnlock
+  0032 650001   [3]             CPHX  #1
+  0035 260d     [3]             BNE   L44 ;abs = 0044
+  0037 450000   [3]             LDHX  @" - OK: PI Unlocked\015\012"
+  003a 89       [2]             PSHX  
+  003b 8b       [2]             PSHH  
+  003c cd0000   [6]             JSR   printf
+  003f a702     [2]             AIS   #2
+  0041 ae01     [2]             LDX   #1
+  0043 8c       [1]             CLRH  
+  0044          L44:    
+  0044 86       [3]             PULA  
+  0045 81       [6]             RTS   
+  361:  
+  362:  /**
+  363:    * name    gf_nPISetSN
+  364:    * bref    设置产品信息中的序列号
+  365:    * param   none
+  366:    * retval  none
+  367:    */
+  368:  int gf_nPISetSN(unsigned char * sn)
+  369:  { 
+
+Function: gf_nPISetSN
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 8b       [2]             PSHH  
+  370:    unsigned char i;
+  371:    DBG_PRINTF("gf_nPISetSN(sn)\r\n");
+  0003 450000   [3]             LDHX  @"gf_nPISetSN(sn)\015\012"
+  0006 89       [2]             PSHX  
+  0007 8b       [2]             PSHH  
+  0008 cd0000   [6]             JSR   printf
+  000b a702     [2]             AIS   #2
+  372:  
+  373:    /* 未载入时不能操作 */
+  374:    if( lv_sPI.uFlag.sFlag.Loaded==0 ){
+  000d c60000   [4]             LDA   lv_sPI
+  0010 a501     [2]             BIT   #1
+  0012 2605     [3]             BNE   L19 ;abs = 0019
+  375:      DBG_PRINTF(" ***NG*** PI Not Loaded\r\n");
+  0014 450000   [3]             LDHX  @" ***NG*** PI Not Loaded\015\012"
+  376:      return NG;
+  0017 2010     [3]             BRA   L29 ;abs = 0029
+  0019          L19:    
+  377:    }
+  378:    
+  379:    /* 检验未通过不能操作 */
+  380:    if( lv_sPI.uFlag.sFlag.Checked==0 ){
+  0019 a502     [2]             BIT   #2
+  001b 2605     [3]             BNE   L22 ;abs = 0022
+  381:      DBG_PRINTF(" ***NG*** PI Not Checked\r\n");
+  001d 450000   [3]             LDHX  @" ***NG*** PI Not Checked\015\012"
+  382:      return  NG;
+  0020 2007     [3]             BRA   L29 ;abs = 0029
+  0022          L22:    
+  383:    }
+  384:  
+  385:    /* 未解锁不能操作 */
+  386:    if( lv_sPI.uFlag.sFlag.Unlocked==0 ){
+  0022 a504     [2]             BIT   #4
+  0024 260f     [3]             BNE   L35 ;abs = 0035
+  387:      DBG_PRINTF(" ***NG*** PI Not Unlocked\r\n");
+  0026 450000   [3]             LDHX  @" ***NG*** PI Not Unlocked\015\012"
+  0029          L29:    
+  0029 89       [2]             PSHX  
+  002a 8b       [2]             PSHH  
+  002b cd0000   [6]             JSR   printf
+  002e a702     [2]             AIS   #2
+  388:      return  NG;
+  0030 45fffe   [3]             LDHX  #-2
+  0033 2028     [3]             BRA   L5D ;abs = 005d
+  0035          L35:    
+  389:    }
+  390:    
+  391:    /* 设置 */
+  392:    for(i=0;i<8;i++) gv_sPI.baSN[i] = sn[i];
+  0035 95       [2]             TSX   
+  0036 7f       [4]             CLR   ,X
+  0037          L37:    
+  0037 f6       [3]             LDA   ,X
+  0038 eb02     [3]             ADD   2,X
+  003a 87       [2]             PSHA  
+  003b 4f       [1]             CLRA  
+  003c e901     [3]             ADC   1,X
+  003e 87       [2]             PSHA  
+  003f 8a       [3]             PULH  
+  0040 88       [3]             PULX  
+  0041 fe       [3]             LDX   ,X
+  0042 9f       [1]             TXA   
+  0043 95       [2]             TSX   
+  0044 fe       [3]             LDX   ,X
+  0045 8c       [1]             CLRH  
+  0046 d70010   [4]             STA   @gv_sPI:16,X
+  0049 95       [2]             TSX   
+  004a 7c       [4]             INC   ,X
+  004b f6       [3]             LDA   ,X
+  004c a108     [2]             CMP   #8
+  004e 25e7     [3]             BCS   L37 ;abs = 0037
+  393:    
+  394:    /* 完成 */
+  395:    DBG_PRINTF(" - OK: PI Set SN\r\n");
+  0050 450000   [3]             LDHX  @" - OK: PI Set SN\015\012"
+  0053 89       [2]             PSHX  
+  0054 8b       [2]             PSHH  
+  0055 cd0000   [6]             JSR   printf
+  0058 a702     [2]             AIS   #2
+  396:    return  OK;
+  005a ae01     [2]             LDX   #1
+  005c 8c       [1]             CLRH  
+  005d          L5D:    
+  397:  }
+  005d a703     [2]             AIS   #3
+  005f 81       [6]             RTS   
+  398:  
+  399:  /**
+  400:    * name    gf_nPISave
+  401:    * bref    将产品信息保存到EEPROM中
+  402:    * param   none
+  403:    * retval  none
+  404:    */
+  405:  int gf_nPISave(void) {
+
+Function: gf_nPISave
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application\pi.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\奥泰10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\pi.c.o" -WmsgSd1106
+
+  406:  
+  407:    int res;
+  408:    DBG_PRINTF("gf_nPISave()\r\n");
+  0000 450000   [3]             LDHX  @"gf_nPISave()\015\012"
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 cd0000   [6]             JSR   printf
+  0008 a702     [2]             AIS   #2
+  409:  
+  410:    /* 未载入时不能操作 */
+  411:    if( lv_sPI.uFlag.sFlag.Loaded==0 ){
+  000a c60000   [4]             LDA   lv_sPI
+  000d a501     [2]             BIT   #1
+  000f 2605     [3]             BNE   L16 ;abs = 0016
+  412:      DBG_PRINTF(" ***NG*** PI Not Loaded\r\n");
+  0011 450000   [3]             LDHX  @" ***NG*** PI Not Loaded\015\012"
+  413:      return NG;
+  0014 2010     [3]             BRA   L26 ;abs = 0026
+  0016          L16:    
+  414:    }
+  415:    
+  416:    /* 检验未通过不能操作 */
+  417:    if( lv_sPI.uFlag.sFlag.Checked==0 ){
+  0016 a502     [2]             BIT   #2
+  0018 2605     [3]             BNE   L1F ;abs = 001f
+  418:      DBG_PRINTF(" ***NG*** PI Not Checked\r\n");
+  001a 450000   [3]             LDHX  @" ***NG*** PI Not Checked\015\012"
+  419:      return  NG;
+  001d 2007     [3]             BRA   L26 ;abs = 0026
+  001f          L1F:    
+  420:    }
+  421:  
+  422:    /* 未解锁不能操作 */
+  423:    if( lv_sPI.uFlag.sFlag.Unlocked==0 ){
+  001f a504     [2]             BIT   #4
+  0021 260e     [3]             BNE   L31 ;abs = 0031
+  424:      DBG_PRINTF(" ***NG*** PI Not Unlocked\r\n");
+  0023 450000   [3]             LDHX  @" ***NG*** PI Not Unlocked\015\012"
+  0026          L26:    
+  0026 89       [2]             PSHX  
+  0027 8b       [2]             PSHH  
+  0028 cd0000   [6]             JSR   printf
+  002b a702     [2]             AIS   #2
+  425:      return  NG;
+  002d 45fffe   [3]             LDHX  #-2
+  0030 81       [6]             RTS   
+  0031          L31:    
+  426:    }
+  427:    
+  428:    /* 更新产品信息 */
+  429:    res = lf_nPIUpdate();
+  0031 cd0000   [6]             JSR   lf_nPIUpdate
+  430:    if( res!=OK ) return res;
+  0034 650001   [3]             CPHX  #1
+  0037 2615     [3]             BNE   L4E ;abs = 004e
+  431:    
+  432:    /* 保存到EEPROM */
+  433:    res = lf_nPISave();
+  0039 cd0000   [6]             JSR   lf_nPISave
+  434:    if( res!=OK ) return res;
+  003c 650001   [3]             CPHX  #1
+  003f 260d     [3]             BNE   L4E ;abs = 004e
+  435:    
+  436:    /* 完成 */
+  437:    DBG_PRINTF(" - OK: PI Save\r\n");
+  0041 450000   [3]             LDHX  @" - OK: PI Save\015\012"
+  0044 89       [2]             PSHX  
+  0045 8b       [2]             PSHH  
+  0046 cd0000   [6]             JSR   printf
+  0049 a702     [2]             AIS   #2
+  438:    return  OK;
+  004b ae01     [2]             LDX   #1
+  004d 8c       [1]             CLRH  
+  004e          L4E:    
+  439:  }
+  004e 81       [6]             RTS   
+  440:  
+  441:  

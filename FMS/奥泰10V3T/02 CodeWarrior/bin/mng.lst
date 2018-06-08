@@ -1,0 +1,1147 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    MNG.c
+    5:    * ver     1.0
+    6:    * brief   This is a MNG file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _MNG_C_  0x77
+   13:  #define FILE_No _MNG_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "mng.h"  /* mandotary */
+   17:  #include  "can.h"
+   18:  #include  "mcu.h"
+   19:  #include  "sc.h"
+   20:  #include  "pi.h"
+   21:  
+   22:  /* Private Macros & Defines --------------------------------------------------*/
+   23:  
+   24:  /* Private typedefs ----------------------------------------------------------*/
+   25:  
+   26:  typedef struct
+   27:  {
+   28:    /* can */
+   29:    struct
+   30:    {
+   31:      can_frame_t rxm;
+   32:      unsigned char we;
+   33:      unsigned char re;
+   34:      can_frame_t txm;
+   35:    }
+   36:    can;
+   37:    /* cmd */
+   38:    struct
+   39:    {
+   40:      unsigned char grp;  //  1xx, 3xx, 5xx, 7xx
+   41:      unsigned char sub;  //  xx1, xx2, xx3, ...
+   42:      unsigned char tgt;  //  target address
+   43:      unsigned char mod;  //  module
+   44:      unsigned char cmd;  //  command
+   45:      unsigned char arg;  //  argument
+   46:      unsigned long val;  //  value
+   47:    }
+   48:    cmd;
+   49:  }
+   50:  mng_t;
+   51:  
+   52:  /* Private consts ------------------------------------------------------------*/
+   53:  
+   54:  /* Private variables ---------------------------------------------------------*/
+   55:  
+   56:  mng_t mng;
+   57:  
+   58:  /* Private function prototypes -----------------------------------------------*/
+   59:  
+   60:  /* Global consts -------------------------------------------------------------*/
+   61:  
+   62:  /* Global variables ----------------------------------------------------------*/
+   63:  
+   64:  /* Functions -----------------------------------------------------------------*/
+   65:  
+   66:  /**
+   67:    * bref    MNG function
+   68:    * param   none
+   69:    * retval  none
+   70:    */
+   71:  
+   72:  void mng_crx_save(can_frame_t* f)
+   73:  {
+
+Function: mng_crx_save
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+   74:  
+   75:    if( mng.can.we ){
+  0002 c6000f   [4]             LDA   mng:15
+  0005 2716     [3]             BEQ   L1D ;abs = 001d
+   76:      mng.can.rxm = *f;
+  0007 450000   [3]             LDHX  @mng
+  000a 89       [2]             PSHX  
+  000b 8b       [2]             PSHH  
+  000c 9efe03   [5]             LDHX  3,SP
+  000f a60f     [2]             LDA   #15
+  0011 cd0000   [6]             JSR   _COPY
+   77:      mng.can.re = 1;
+  0014 a601     [2]             LDA   #1
+  0016 c70010   [4]             STA   mng:16
+   78:      mng.can.we = 0;
+  0019 4f       [1]             CLRA  
+  001a c7000f   [4]             STA   mng:15
+  001d          L1D:    
+   79:    }
+   80:  
+   81:  }
+  001d a702     [2]             AIS   #2
+  001f 81       [6]             RTS   
+   82:  
+   83:  static void lf_vMngExec700_M0_Info(void)
+   84:  {
+
+Function: lf_vMngExec700_M0_Info
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+   85:  }
+  0000 81       [6]             RTS   
+   86:  
+   87:  static void lf_vMngExec700_M0_Oper(void)
+   88:  {
+
+Function: lf_vMngExec700_M0_Oper
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+   89:  }
+  0000 81       [6]             RTS   
+   90:  
+   91:  static void lf_vMngExec700_M0_Read(void)
+   92:  {
+
+Function: lf_vMngExec700_M0_Read
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7fc     [2]             AIS   #-4
+   93:    unsigned long val;
+   94:    DBG_PRINTF(" - Exec700 M0 Read\r\n");
+  0002 450000   [3]             LDHX  @" - Exec700 M0 Read\015\012"
+  0005 89       [2]             PSHX  
+  0006 8b       [2]             PSHH  
+  0007 cd0000   [6]             JSR   printf
+  000a a702     [2]             AIS   #2
+   95:  
+   96:    /* ¶ÁÈ¡Êý¾Ý */
+   97:    switch( mng.cmd.arg ){
+  000c c60025   [4]             LDA   mng:37
+  000f 260b     [3]             BNE   L1C ;abs = 001c
+   98:      case  0:
+   99:        val = rtc_sec;
+  0011 320002   [5]             LDHX  rtc_sec:2
+  0014 9eff03   [5]             STHX  3,SP
+  0017 320000   [5]             LDHX  rtc_sec
+  100:        break;
+  001a 2008     [3]             BRA   L24 ;abs = 0024
+  001c          L1C:    
+  101:      default:
+  102:        val = 0xffffffff;
+  001c 45ffff   [3]             LDHX  #-1
+  001f 9eff03   [5]             STHX  3,SP
+  0022 89       [2]             PSHX  
+  0023 8a       [3]             PULH  
+  0024          L24:    
+  0024 9eff01   [5]             STHX  1,SP
+  103:        break;    
+  104:    }
+  105:  
+  106:    /* ×¼±¸Êý¾Ý */
+  107:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  0027 c60118   [4]             LDA   gv_sSC:280
+  002a a40f     [2]             AND   #15
+  002c ae10     [2]             LDX   #16
+  002e 42       [5]             MUL   
+  002f 87       [2]             PSHA  
+  0030 9f       [1]             TXA   
+  0031 aa07     [2]             ORA   #7
+  0033 88       [3]             PULX  
+  0034 87       [2]             PSHA  
+  0035 8a       [3]             PULH  
+  0036 960013   [5]             STHX  mng:19
+  0039 8c       [1]             CLRH  
+  003a 5f       [1]             CLRX  
+  003b 960011   [5]             STHX  mng:17
+  108:    mng.can.txm.dlc = 8;
+  003e a608     [2]             LDA   #8
+  0040 450015   [3]             LDHX  @mng:21
+  0043 f7       [2]             STA   ,X
+  109:    mng.can.txm.data[0] = mng.cmd.tgt;
+  0044 e60d     [3]             LDA   13,X
+  0046 e701     [3]             STA   1,X
+  110:    mng.can.txm.data[1] = mng.cmd.mod;
+  0048 e60e     [3]             LDA   14,X
+  004a e702     [3]             STA   2,X
+  111:    mng.can.txm.data[2] = mng.cmd.cmd;
+  004c e60f     [3]             LDA   15,X
+  004e e703     [3]             STA   3,X
+  112:    mng.can.txm.data[3] = mng.cmd.arg;
+  0050 e610     [3]             LDA   16,X
+  0052 e704     [3]             STA   4,X
+  113:    mng.can.txm.data[4] = (unsigned char)(val>>24);
+  0054 95       [2]             TSX   
+  0055 f6       [3]             LDA   ,X
+  0056 c7001a   [4]             STA   mng:26
+  114:    mng.can.txm.data[5] = (unsigned char)(val>>16);
+  0059 e601     [3]             LDA   1,X
+  005b c7001b   [4]             STA   mng:27
+  115:    mng.can.txm.data[6] = (unsigned char)(val>>8);
+  005e e602     [3]             LDA   2,X
+  0060 c7001c   [4]             STA   mng:28
+  116:    mng.can.txm.data[7] = (unsigned char)(val>>0);
+  0063 e603     [3]             LDA   3,X
+  0065 c7001d   [4]             STA   mng:29
+  117:  
+  118:    /* ·¢ËÍÏûÏ¢ */
+  119:    (void)can_xmit(&mng.can.txm);
+  0068 450011   [3]             LDHX  @mng:17
+  006b cd0000   [6]             JSR   can_xmit
+  120:  }
+  006e a704     [2]             AIS   #4
+  0070 81       [6]             RTS   
+  121:  
+  122:  static void lf_vMngExec700_M0_Write(void)
+  123:  {
+
+Function: lf_vMngExec700_M0_Write
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7fc     [2]             AIS   #-4
+  124:    unsigned long val;
+  125:    DBG_PRINTF(" - Exec700 M0 Write\r\n");
+  0002 450000   [3]             LDHX  @" - Exec700 M0 Write\015\012"
+  0005 89       [2]             PSHX  
+  0006 8b       [2]             PSHH  
+  0007 cd0000   [6]             JSR   printf
+  000a a702     [2]             AIS   #2
+  126:    
+  127:    /* ÌáÈ¡Êý¾Ý */
+  128:    val = mng.cmd.val;
+  000c 320028   [5]             LDHX  mng:40
+  000f 9eff03   [5]             STHX  3,SP
+  0012 320026   [5]             LDHX  mng:38
+  0015 9eff01   [5]             STHX  1,SP
+  129:    
+  130:    /* Ð´ÈëÊý¾Ý */
+  131:    switch( mng.cmd.arg ){
+  0018 c60025   [4]             LDA   mng:37
+  001b 260e     [3]             BNE   L2B ;abs = 002b
+  132:      case  0:
+  133:        rtc_sec = val;
+  001d 9efe03   [5]             LDHX  3,SP
+  0020 960002   [5]             STHX  rtc_sec:2
+  0023 9efe01   [5]             LDHX  1,SP
+  0026 960000   [5]             STHX  rtc_sec
+  134:        break;
+  0029 200b     [3]             BRA   L36 ;abs = 0036
+  002b          L2B:    
+  135:      default:
+  136:        val = 0xffffffff;
+  002b 45ffff   [3]             LDHX  #-1
+  002e 9eff03   [5]             STHX  3,SP
+  0031 89       [2]             PSHX  
+  0032 8a       [3]             PULH  
+  0033 9eff01   [5]             STHX  1,SP
+  0036          L36:    
+  137:        break;    
+  138:    }
+  139:    
+  140:    /* ×¼±¸Êý¾Ý */
+  141:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  0036 c60118   [4]             LDA   gv_sSC:280
+  0039 a40f     [2]             AND   #15
+  003b ae10     [2]             LDX   #16
+  003d 42       [5]             MUL   
+  003e 87       [2]             PSHA  
+  003f 9f       [1]             TXA   
+  0040 aa07     [2]             ORA   #7
+  0042 88       [3]             PULX  
+  0043 87       [2]             PSHA  
+  0044 8a       [3]             PULH  
+  0045 960013   [5]             STHX  mng:19
+  0048 8c       [1]             CLRH  
+  0049 5f       [1]             CLRX  
+  004a 960011   [5]             STHX  mng:17
+  142:    mng.can.txm.dlc = 8;
+  004d a608     [2]             LDA   #8
+  004f 450015   [3]             LDHX  @mng:21
+  0052 f7       [2]             STA   ,X
+  143:    mng.can.txm.data[0] = mng.cmd.tgt;
+  0053 e60d     [3]             LDA   13,X
+  0055 e701     [3]             STA   1,X
+  144:    mng.can.txm.data[1] = mng.cmd.mod;
+  0057 e60e     [3]             LDA   14,X
+  0059 e702     [3]             STA   2,X
+  145:    mng.can.txm.data[2] = mng.cmd.cmd;
+  005b e60f     [3]             LDA   15,X
+  005d e703     [3]             STA   3,X
+  146:    mng.can.txm.data[3] = mng.cmd.arg;
+  005f e610     [3]             LDA   16,X
+  0061 e704     [3]             STA   4,X
+  147:    mng.can.txm.data[4] = (unsigned char)(val>>24);
+  0063 95       [2]             TSX   
+  0064 f6       [3]             LDA   ,X
+  0065 c7001a   [4]             STA   mng:26
+  148:    mng.can.txm.data[5] = (unsigned char)(val>>16);
+  0068 e601     [3]             LDA   1,X
+  006a c7001b   [4]             STA   mng:27
+  149:    mng.can.txm.data[6] = (unsigned char)(val>>8);
+  006d e602     [3]             LDA   2,X
+  006f c7001c   [4]             STA   mng:28
+  150:    mng.can.txm.data[7] = (unsigned char)(val>>0);
+  0072 e603     [3]             LDA   3,X
+  0074 c7001d   [4]             STA   mng:29
+  151:  
+  152:    /* ·¢ËÍÏûÏ¢ */
+  153:    (void)can_xmit(&mng.can.txm);  
+  0077 450011   [3]             LDHX  @mng:17
+  007a cd0000   [6]             JSR   can_xmit
+  154:  }
+  007d a704     [2]             AIS   #4
+  007f 81       [6]             RTS   
+  155:  
+  156:  static void lf_vMngExec700_M0(void)
+  157:  {
+
+Function: lf_vMngExec700_M0
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  158:    DBG_PRINTF(" - Exec700 M0\r\n");
+  0000 450000   [3]             LDHX  @" - Exec700 M0\015\012"
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 cd0000   [6]             JSR   printf
+  0008 a702     [2]             AIS   #2
+  159:  
+  160:    switch( mng.cmd.cmd ){
+  000a ce0024   [4]             LDX   mng:36
+  000d a303     [2]             CPX   #3
+  000f 2216     [3]             BHI   L27 ;abs = 0027
+  0011 4f       [1]             CLRA  
+  0012 cd0000   [6]             JSR   _Jump_Table_Header_Offset
+  0015 04               DC.B  4
+  0016 10               DC.B  L27
+  0017 03               DC.B  L1B
+  0018 05               DC.B  L1E
+  0019 07               DC.B  L21
+  001a 09               DC.B  L24
+  001b          L1B:    
+  161:      /* »ù±¾ÐÅÏ¢ */
+  162:      case  0:  lf_vMngExec700_M0_Info();  break;
+  001b cc0000   [4]             JMP   lf_vMngExec700_M0_Info
+  001e          L1E:    
+  163:      /* »ù±¾²Ù×÷ */
+  164:      case  1:  lf_vMngExec700_M0_Oper();  break;
+  001e cc0000   [4]             JMP   lf_vMngExec700_M0_Oper
+  0021          L21:    
+  165:      /* ¶ÁÈ¡²ÎÊý */
+  166:      case  2:  lf_vMngExec700_M0_Read();  break;
+  0021 cc0000   [4]             JMP   lf_vMngExec700_M0_Read
+  0024          L24:    
+  167:      /* Ð´Èë²ÎÊý */
+  168:      case  3:  lf_vMngExec700_M0_Write(); break;
+  0024 cc0000   [4]             JMP   lf_vMngExec700_M0_Write
+  0027          L27:    
+  169:      default:  break;
+  170:    }
+  171:  }
+  0027 81       [6]             RTS   
+  172:  
+  173:  static void lf_vMngExec700_PI_Info(void)
+  174:  {
+
+Function: lf_vMngExec700_PI_Info
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  175:    unsigned char i;
+  176:    DBG_PRINTF(" - Exec700 PI Info\r\n");
+  0001 450000   [3]             LDHX  @" - Exec700 PI Info\015\012"
+  0004 89       [2]             PSHX  
+  0005 8b       [2]             PSHH  
+  0006 cd0000   [6]             JSR   printf
+  0009 a702     [2]             AIS   #2
+  177:  
+  178:    /* ×¼±¸Êý¾Ý */
+  179:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  000b c60118   [4]             LDA   gv_sSC:280
+  000e a40f     [2]             AND   #15
+  0010 ae10     [2]             LDX   #16
+  0012 42       [5]             MUL   
+  0013 87       [2]             PSHA  
+  0014 9f       [1]             TXA   
+  0015 aa07     [2]             ORA   #7
+  0017 88       [3]             PULX  
+  0018 87       [2]             PSHA  
+  0019 8a       [3]             PULH  
+  001a 960013   [5]             STHX  mng:19
+  001d 8c       [1]             CLRH  
+  001e 5f       [1]             CLRX  
+  001f 960011   [5]             STHX  mng:17
+  180:    mng.can.txm.dlc = 8;
+  0022 a608     [2]             LDA   #8
+  0024 c70015   [4]             STA   mng:21
+  181:    for(i=0;i<8;i++) mng.can.txm.data[i] = gv_sPI.baSN[i];
+  0027 95       [2]             TSX   
+  0028 7f       [4]             CLR   ,X
+  0029          L29:    
+  0029 fe       [3]             LDX   ,X
+  002a 8c       [1]             CLRH  
+  002b d60010   [4]             LDA   @gv_sPI:16,X
+  002e d70016   [4]             STA   @mng:22,X
+  0031 95       [2]             TSX   
+  0032 7c       [4]             INC   ,X
+  0033 f6       [3]             LDA   ,X
+  0034 a108     [2]             CMP   #8
+  0036 25f1     [3]             BCS   L29 ;abs = 0029
+  182:  
+  183:    /* ·¢ËÍÏûÏ¢ */
+  184:    (void)can_xmit(&mng.can.txm);
+  0038 450011   [3]             LDHX  @mng:17
+  003b cd0000   [6]             JSR   can_xmit
+  185:  }
+  003e 8a       [3]             PULH  
+  003f 81       [6]             RTS   
+  186:  
+  187:  static void lf_vMngExec700_PI_Oper(void)
+  188:  {
+
+Function: lf_vMngExec700_PI_Oper
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7fe     [2]             AIS   #-2
+  189:    int res;
+  190:    DBG_PRINTF(" - Exec700 PI Oper\r\n");
+  0002 450000   [3]             LDHX  @" - Exec700 PI Oper\015\012"
+  0005 89       [2]             PSHX  
+  0006 8b       [2]             PSHH  
+  0007 cd0000   [6]             JSR   printf
+  000a a702     [2]             AIS   #2
+  191:  
+  192:    /* Ö´ÐÐ²Ù×÷ */
+  193:    switch( mng.cmd.arg ){
+  000c ce0025   [4]             LDX   mng:37
+  000f a303     [2]             CPX   #3
+  0011 2221     [3]             BHI   L34 ;abs = 0034
+  0013 4f       [1]             CLRA  
+  0014 cd0000   [6]             JSR   _Jump_Table_Header_Offset
+  0017 04               DC.B  4
+  0018 1b               DC.B  L34
+  0019 03               DC.B  L1D
+  001a 07               DC.B  L22
+  001b 0b               DC.B  L27
+  001c 0f               DC.B  L2C
+  001d          L1D:    
+  194:      case  0: res = gf_nPIInit(); break;
+  001d cd0000   [6]             JSR   gf_nPIInit
+  0020 2015     [3]             BRA   L37 ;abs = 0037
+  0022          L22:    
+  195:      case  1: res = gf_nPILoad(); break;
+  0022 cd0000   [6]             JSR   gf_nPILoad
+  0025 2010     [3]             BRA   L37 ;abs = 0037
+  0027          L27:    
+  196:      case  2: res = gf_nPISave(); break;
+  0027 cd0000   [6]             JSR   gf_nPISave
+  002a 200b     [3]             BRA   L37 ;abs = 0037
+  002c          L2C:    
+  197:      case  3: res = gf_nPIUnlock((unsigned char)mng.cmd.val); break;
+  002c c60029   [4]             LDA   mng:41
+  002f cd0000   [6]             JSR   gf_nPIUnlock
+  0032 2003     [3]             BRA   L37 ;abs = 0037
+  0034          L34:    
+  198:      default: res = NG;      
+  0034 45fffe   [3]             LDHX  #-2
+  0037          L37:    
+  0037 9eff01   [5]             STHX  1,SP
+  199:    }
+  200:  
+  201:    /* ×¼±¸Êý¾Ý */
+  202:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  003a c60118   [4]             LDA   gv_sSC:280
+  003d a40f     [2]             AND   #15
+  003f ae10     [2]             LDX   #16
+  0041 42       [5]             MUL   
+  0042 87       [2]             PSHA  
+  0043 9f       [1]             TXA   
+  0044 aa07     [2]             ORA   #7
+  0046 88       [3]             PULX  
+  0047 87       [2]             PSHA  
+  0048 8a       [3]             PULH  
+  0049 960013   [5]             STHX  mng:19
+  004c 8c       [1]             CLRH  
+  004d 5f       [1]             CLRX  
+  004e 960011   [5]             STHX  mng:17
+  203:    mng.can.txm.dlc = 8;
+  0051 a608     [2]             LDA   #8
+  0053 c70015   [4]             STA   mng:21
+  204:    mng.can.txm.data[0] = mng.cmd.tgt;
+  0056 ce0022   [4]             LDX   mng:34
+  0059 cf0016   [4]             STX   mng:22
+  205:    mng.can.txm.data[1] = mng.cmd.mod;
+  005c ce0023   [4]             LDX   mng:35
+  005f cf0017   [4]             STX   mng:23
+  206:    mng.can.txm.data[2] = mng.cmd.cmd;
+  0062 ce0024   [4]             LDX   mng:36
+  0065 cf0018   [4]             STX   mng:24
+  207:    mng.can.txm.data[3] = mng.cmd.arg;
+  0068 ce0025   [4]             LDX   mng:37
+  006b cf0019   [4]             STX   mng:25
+  208:    mng.can.txm.data[4] = (unsigned char)((long)res>>24);
+  006e 9efe01   [5]             LDHX  1,SP
+  0071 9f       [1]             TXA   
+  0072 8b       [2]             PSHH  
+  0073 88       [3]             PULX  
+  0074 87       [2]             PSHA  
+  0075 cd0000   [6]             JSR   _SEXT16_32
+  0078 95       [2]             TSX   
+  0079 f6       [3]             LDA   ,X
+  007a c7001a   [4]             STA   mng:26
+  209:    mng.can.txm.data[5] = (unsigned char)((long)res>>16);
+  007d a610     [2]             LDA   #16
+  007f cd0000   [6]             JSR   _LASR
+  0082 9ee604   [4]             LDA   4,SP
+  0085 c7001b   [4]             STA   mng:27
+  210:    mng.can.txm.data[6] = (unsigned char)((long)res>>8);
+  0088 a608     [2]             LDA   #8
+  008a cd0000   [6]             JSR   _LASR
+  008d 95       [2]             TSX   
+  008e e603     [3]             LDA   3,X
+  0090 c7001c   [4]             STA   mng:28
+  211:    mng.can.txm.data[7] = (unsigned char)((long)res>>0);
+  0093 e60d     [3]             LDA   13,X
+  0095 c7001d   [4]             STA   mng:29
+  212:  
+  213:    /* ·¢ËÍÏûÏ¢ */
+  214:    (void)can_xmit(&mng.can.txm);
+  0098 450011   [3]             LDHX  @mng:17
+  009b cd0000   [6]             JSR   can_xmit
+  215:  }
+  009e a70e     [2]             AIS   #14
+  00a0 81       [6]             RTS   
+  216:  
+  217:  static void lf_vMngExec700_PI_Read(void)
+  218:  {
+
+Function: lf_vMngExec700_PI_Read
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7fe     [2]             AIS   #-2
+  219:    DBG_PRINTF(" - Exec700 PI Read\r\n");
+  0002 450000   [3]             LDHX  @" - Exec700 PI Read\015\012"
+  0005 89       [2]             PSHX  
+  0006 8b       [2]             PSHH  
+  0007 cd0000   [6]             JSR   printf
+  000a a702     [2]             AIS   #2
+  220:  
+  221:    /* ¶ÁÈ¡Êý¾Ý */
+  222:    if( mng.cmd.arg<6 ){
+  000c ce0025   [4]             LDX   mng:37
+  000f a306     [2]             CPX   #6
+  0011 244a     [3]             BCC   L5D ;abs = 005d
+  223:      unsigned char * p = (unsigned char *)&gv_sPI;
+  0013 450000   [3]             LDHX  @gv_sPI
+  0016 9eff01   [5]             STHX  1,SP
+  0019 cd009f   [6]             JSR   L9F ;abs = 009f
+  224:      mng.can.txm.data[4] = p[mng.cmd.arg*4+0];
+  001c 87       [2]             PSHA  
+  001d 9f       [1]             TXA   
+  001e 95       [2]             TSX   
+  001f eb02     [3]             ADD   2,X
+  0021 87       [2]             PSHA  
+  0022 f6       [3]             LDA   ,X
+  0023 e901     [3]             ADC   1,X
+  0025 87       [2]             PSHA  
+  0026 8a       [3]             PULH  
+  0027 88       [3]             PULX  
+  0028 fe       [3]             LDX   ,X
+  0029 cf001a   [4]             STX   mng:26
+  002c ad71     [5]             BSR   L9F ;abs = 009f
+  225:      mng.can.txm.data[5] = p[mng.cmd.arg*4+1];
+  002e 87       [2]             PSHA  
+  002f 8a       [3]             PULH  
+  0030 af01     [2]             AIX   #1
+  0032 9f       [1]             TXA   
+  0033 8b       [2]             PSHH  
+  0034 95       [2]             TSX   
+  0035 eb03     [3]             ADD   3,X
+  0037 e701     [3]             STA   1,X
+  0039 86       [3]             PULA  
+  003a e902     [3]             ADC   2,X
+  003c 87       [2]             PSHA  
+  003d 8a       [3]             PULH  
+  003e 88       [3]             PULX  
+  003f fe       [3]             LDX   ,X
+  0040 cf001b   [4]             STX   mng:27
+  0043 ad5a     [5]             BSR   L9F ;abs = 009f
+  226:      mng.can.txm.data[6] = p[mng.cmd.arg*4+2];
+  0045 87       [2]             PSHA  
+  0046 8a       [3]             PULH  
+  0047 af02     [2]             AIX   #2
+  0049 ad5d     [5]             BSR   LA8 ;abs = 00a8
+  004b fe       [3]             LDX   ,X
+  004c cf001c   [4]             STX   mng:28
+  004f ad4e     [5]             BSR   L9F ;abs = 009f
+  227:      mng.can.txm.data[7] = p[mng.cmd.arg*4+3];
+  0051 87       [2]             PSHA  
+  0052 8a       [3]             PULH  
+  0053 af03     [2]             AIX   #3
+  0055 ad51     [5]             BSR   LA8 ;abs = 00a8
+  0057 fe       [3]             LDX   ,X
+  0058 cf001d   [4]             STX   mng:29
+  228:    }else{
+  005b 200c     [3]             BRA   L69 ;abs = 0069
+  005d          L5D:    
+  229:      mng.can.txm.data[4] = 0xff;
+  005d a6ff     [2]             LDA   #-1
+  005f 45001a   [3]             LDHX  @mng:26
+  0062 f7       [2]             STA   ,X
+  230:      mng.can.txm.data[5] = 0xff;
+  0063 e701     [3]             STA   1,X
+  231:      mng.can.txm.data[6] = 0xff;
+  0065 e702     [3]             STA   2,X
+  232:      mng.can.txm.data[7] = 0xff;
+  0067 e703     [3]             STA   3,X
+  0069          L69:    
+  233:    }
+  234:  
+  235:    /* ×¼±¸Êý¾Ý */
+  236:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  0069 c60118   [4]             LDA   gv_sSC:280
+  006c a40f     [2]             AND   #15
+  006e ae10     [2]             LDX   #16
+  0070 42       [5]             MUL   
+  0071 87       [2]             PSHA  
+  0072 9f       [1]             TXA   
+  0073 aa07     [2]             ORA   #7
+  0075 88       [3]             PULX  
+  0076 87       [2]             PSHA  
+  0077 8a       [3]             PULH  
+  0078 960013   [5]             STHX  mng:19
+  007b 8c       [1]             CLRH  
+  007c 5f       [1]             CLRX  
+  007d 960011   [5]             STHX  mng:17
+  237:    mng.can.txm.dlc = 8;
+  0080 a608     [2]             LDA   #8
+  0082 450015   [3]             LDHX  @mng:21
+  0085 f7       [2]             STA   ,X
+  238:    mng.can.txm.data[0] = mng.cmd.tgt;
+  0086 e60d     [3]             LDA   13,X
+  0088 e701     [3]             STA   1,X
+  239:    mng.can.txm.data[1] = mng.cmd.mod;
+  008a e60e     [3]             LDA   14,X
+  008c e702     [3]             STA   2,X
+  240:    mng.can.txm.data[2] = mng.cmd.cmd;
+  008e e60f     [3]             LDA   15,X
+  0090 e703     [3]             STA   3,X
+  241:    mng.can.txm.data[3] = mng.cmd.arg;
+  0092 e610     [3]             LDA   16,X
+  0094 e704     [3]             STA   4,X
+  242:  
+  243:    /* ·¢ËÍÏûÏ¢ */
+  244:    (void)can_xmit(&mng.can.txm);
+  0096 450011   [3]             LDHX  @mng:17
+  0099 cd0000   [6]             JSR   can_xmit
+  245:  }
+  009c a702     [2]             AIS   #2
+  009e 81       [6]             RTS   
+  009f          L9F:    
+  009f ce0025   [4]             LDX   mng:37
+  00a2 4f       [1]             CLRA  
+  00a3 58       [1]             LSLX  
+  00a4 49       [1]             ROLA  
+  00a5 58       [1]             LSLX  
+  00a6 49       [1]             ROLA  
+  00a7 81       [6]             RTS   
+  00a8          LA8:    
+  00a8 9f       [1]             TXA   
+  00a9 9eeb04   [4]             ADD   4,SP
+  00ac 87       [2]             PSHA  
+  00ad 8b       [2]             PSHH  
+  00ae 86       [3]             PULA  
+  00af 95       [2]             TSX   
+  00b0 e903     [3]             ADC   3,X
+  00b2 87       [2]             PSHA  
+  00b3 8a       [3]             PULH  
+  00b4 88       [3]             PULX  
+  00b5 81       [6]             RTS   
+  246:  
+  247:  static void lf_vMngExec700_PI_Write(void)
+  248:  {
+
+Function: lf_vMngExec700_PI_Write
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7fc     [2]             AIS   #-4
+  249:    DBG_PRINTF(" - Exec700 PI Read\r\n");
+  0002 450000   [3]             LDHX  @" - Exec700 PI Read\015\012"
+  0005 89       [2]             PSHX  
+  0006 8b       [2]             PSHH  
+  0007 cd0000   [6]             JSR   printf
+  000a a702     [2]             AIS   #2
+  250:  
+  251:    /* Ð´ÈëÊý¾Ý */
+  252:    if( mng.cmd.arg>=4 && mng.cmd.arg<6 ){
+  000c c60025   [4]             LDA   mng:37
+  000f a004     [2]             SUB   #4
+  0011 a101     [2]             CMP   #1
+  0013 224d     [3]             BHI   L62 ;abs = 0062
+  253:      unsigned char * p = (unsigned char *)&gv_sPI;
+  0015 450000   [3]             LDHX  @gv_sPI
+  0018 9eff01   [5]             STHX  1,SP
+  001b cd00f5   [6]             JSR   LF5 ;abs = 00f5
+  254:      p[mng.cmd.arg*4+0] = mng.can.rxm.data[4];
+  001e 87       [2]             PSHA  
+  001f 9f       [1]             TXA   
+  0020 95       [2]             TSX   
+  0021 eb02     [3]             ADD   2,X
+  0023 87       [2]             PSHA  
+  0024 f6       [3]             LDA   ,X
+  0025 e901     [3]             ADC   1,X
+  0027 87       [2]             PSHA  
+  0028 8a       [3]             PULH  
+  0029 88       [3]             PULX  
+  002a c60009   [4]             LDA   mng:9
+  002d f7       [2]             STA   ,X
+  002e cd00f5   [6]             JSR   LF5 ;abs = 00f5
+  255:      p[mng.cmd.arg*4+1] = mng.can.rxm.data[5];
+  0031 87       [2]             PSHA  
+  0032 8a       [3]             PULH  
+  0033 af01     [2]             AIX   #1
+  0035 9f       [1]             TXA   
+  0036 8b       [2]             PSHH  
+  0037 95       [2]             TSX   
+  0038 eb03     [3]             ADD   3,X
+  003a e701     [3]             STA   1,X
+  003c 86       [3]             PULA  
+  003d e902     [3]             ADC   2,X
+  003f 87       [2]             PSHA  
+  0040 8a       [3]             PULH  
+  0041 88       [3]             PULX  
+  0042 c6000a   [4]             LDA   mng:10
+  0045 f7       [2]             STA   ,X
+  0046 cd00f5   [6]             JSR   LF5 ;abs = 00f5
+  256:      p[mng.cmd.arg*4+2] = mng.can.rxm.data[6];
+  0049 87       [2]             PSHA  
+  004a 8a       [3]             PULH  
+  004b af02     [2]             AIX   #2
+  004d cd00fe   [6]             JSR   LFE ;abs = 00fe
+  0050 c6000b   [4]             LDA   mng:11
+  0053 f7       [2]             STA   ,X
+  0054 cd00f5   [6]             JSR   LF5 ;abs = 00f5
+  257:      p[mng.cmd.arg*4+3] = mng.can.rxm.data[7];
+  0057 87       [2]             PSHA  
+  0058 8a       [3]             PULH  
+  0059 af03     [2]             AIX   #3
+  005b cd00fe   [6]             JSR   LFE ;abs = 00fe
+  005e c6000c   [4]             LDA   mng:12
+  0061 f7       [2]             STA   ,X
+  0062          L62:    
+  258:    }
+  259:  
+  260:    /* ¶Á»ØÊý¾Ý */
+  261:    if( mng.cmd.arg<6 ){
+  0062 ce0025   [4]             LDX   mng:37
+  0065 a306     [2]             CPX   #6
+  0067 244a     [3]             BCC   LB3 ;abs = 00b3
+  262:      unsigned char * p = (unsigned char *)&gv_sPI;
+  0069 450000   [3]             LDHX  @gv_sPI
+  006c 9eff03   [5]             STHX  3,SP
+  006f cd00f5   [6]             JSR   LF5 ;abs = 00f5
+  263:      mng.can.txm.data[4] = p[mng.cmd.arg*4+0];
+  0072 87       [2]             PSHA  
+  0073 9f       [1]             TXA   
+  0074 95       [2]             TSX   
+  0075 eb04     [3]             ADD   4,X
+  0077 87       [2]             PSHA  
+  0078 f6       [3]             LDA   ,X
+  0079 e903     [3]             ADC   3,X
+  007b 87       [2]             PSHA  
+  007c 8a       [3]             PULH  
+  007d 88       [3]             PULX  
+  007e fe       [3]             LDX   ,X
+  007f cf001a   [4]             STX   mng:26
+  0082 ad71     [5]             BSR   LF5 ;abs = 00f5
+  264:      mng.can.txm.data[5] = p[mng.cmd.arg*4+1];
+  0084 87       [2]             PSHA  
+  0085 8a       [3]             PULH  
+  0086 af01     [2]             AIX   #1
+  0088 9f       [1]             TXA   
+  0089 8b       [2]             PSHH  
+  008a 95       [2]             TSX   
+  008b eb05     [3]             ADD   5,X
+  008d e701     [3]             STA   1,X
+  008f 86       [3]             PULA  
+  0090 e904     [3]             ADC   4,X
+  0092 87       [2]             PSHA  
+  0093 8a       [3]             PULH  
+  0094 88       [3]             PULX  
+  0095 fe       [3]             LDX   ,X
+  0096 cf001b   [4]             STX   mng:27
+  0099 ad5a     [5]             BSR   LF5 ;abs = 00f5
+  265:      mng.can.txm.data[6] = p[mng.cmd.arg*4+2];
+  009b 87       [2]             PSHA  
+  009c 8a       [3]             PULH  
+  009d af02     [2]             AIX   #2
+  009f ad60     [5]             BSR   L101 ;abs = 0101
+  00a1 fe       [3]             LDX   ,X
+  00a2 cf001c   [4]             STX   mng:28
+  00a5 ad4e     [5]             BSR   LF5 ;abs = 00f5
+  266:      mng.can.txm.data[7] = p[mng.cmd.arg*4+3];
+  00a7 87       [2]             PSHA  
+  00a8 8a       [3]             PULH  
+  00a9 af03     [2]             AIX   #3
+  00ab ad54     [5]             BSR   L101 ;abs = 0101
+  00ad fe       [3]             LDX   ,X
+  00ae cf001d   [4]             STX   mng:29
+  267:    }else{
+  00b1 200c     [3]             BRA   LBF ;abs = 00bf
+  00b3          LB3:    
+  268:      mng.can.txm.data[4] = 0xff;
+  00b3 a6ff     [2]             LDA   #-1
+  00b5 45001a   [3]             LDHX  @mng:26
+  00b8 f7       [2]             STA   ,X
+  269:      mng.can.txm.data[5] = 0xff;
+  00b9 e701     [3]             STA   1,X
+  270:      mng.can.txm.data[6] = 0xff;
+  00bb e702     [3]             STA   2,X
+  271:      mng.can.txm.data[7] = 0xff;
+  00bd e703     [3]             STA   3,X
+  00bf          LBF:    
+  272:    }
+  273:  
+  274:    /* ×¼±¸Êý¾Ý */
+  275:    mng.can.txm.id = 0x700 | ((gv_sSC.sWX.bModNum &0xf) <<4);
+  00bf c60118   [4]             LDA   gv_sSC:280
+  00c2 a40f     [2]             AND   #15
+  00c4 ae10     [2]             LDX   #16
+  00c6 42       [5]             MUL   
+  00c7 87       [2]             PSHA  
+  00c8 9f       [1]             TXA   
+  00c9 aa07     [2]             ORA   #7
+  00cb 88       [3]             PULX  
+  00cc 87       [2]             PSHA  
+  00cd 8a       [3]             PULH  
+  00ce 960013   [5]             STHX  mng:19
+  00d1 8c       [1]             CLRH  
+  00d2 5f       [1]             CLRX  
+  00d3 960011   [5]             STHX  mng:17
+  276:    mng.can.txm.dlc = 8;
+  00d6 a608     [2]             LDA   #8
+  00d8 450015   [3]             LDHX  @mng:21
+  00db f7       [2]             STA   ,X
+  277:    mng.can.txm.data[0] = mng.cmd.tgt;
+  00dc e60d     [3]             LDA   13,X
+  00de e701     [3]             STA   1,X
+  278:    mng.can.txm.data[1] = mng.cmd.mod;
+  00e0 e60e     [3]             LDA   14,X
+  00e2 e702     [3]             STA   2,X
+  279:    mng.can.txm.data[2] = mng.cmd.cmd;
+  00e4 e60f     [3]             LDA   15,X
+  00e6 e703     [3]             STA   3,X
+  280:    mng.can.txm.data[3] = mng.cmd.arg;
+  00e8 e610     [3]             LDA   16,X
+  00ea e704     [3]             STA   4,X
+  281:  
+  282:    /* ·¢ËÍÏûÏ¢ */
+  283:    (void)can_xmit(&mng.can.txm);
+  00ec 450011   [3]             LDHX  @mng:17
+  00ef cd0000   [6]             JSR   can_xmit
+  284:  }
+  00f2 a704     [2]             AIS   #4
+  00f4 81       [6]             RTS   
+  00f5          LF5:    
+  00f5 ce0025   [4]             LDX   mng:37
+  00f8 4f       [1]             CLRA  
+  00f9 58       [1]             LSLX  
+  00fa 49       [1]             ROLA  
+  00fb 58       [1]             LSLX  
+  00fc 49       [1]             ROLA  
+  00fd 81       [6]             RTS   
+  00fe          LFE:    
+  00fe ad01     [5]             BSR   L101 ;abs = 0101
+  0100 81       [6]             RTS   
+  0101          L101:   
+  0101 9f       [1]             TXA   
+  0102 9eeb06   [4]             ADD   6,SP
+  0105 87       [2]             PSHA  
+  0106 8b       [2]             PSHH  
+  0107 86       [3]             PULA  
+  0108 95       [2]             TSX   
+  0109 e905     [3]             ADC   5,X
+  010b 87       [2]             PSHA  
+  010c 8a       [3]             PULH  
+  010d 88       [3]             PULX  
+  010e 81       [6]             RTS   
+  285:  
+  286:  static void lf_vMngExec700_PI(void)
+  287:  {
+
+Function: lf_vMngExec700_PI
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  288:    DBG_PRINTF(" - Exec700 PI\r\n");
+  0000 450000   [3]             LDHX  @" - Exec700 PI\015\012"
+  0003 89       [2]             PSHX  
+  0004 8b       [2]             PSHH  
+  0005 cd0000   [6]             JSR   printf
+  0008 a702     [2]             AIS   #2
+  289:  
+  290:    switch( mng.cmd.cmd ){
+  000a ce0024   [4]             LDX   mng:36
+  000d a303     [2]             CPX   #3
+  000f 2216     [3]             BHI   L27 ;abs = 0027
+  0011 4f       [1]             CLRA  
+  0012 cd0000   [6]             JSR   _Jump_Table_Header_Offset
+  0015 04               DC.B  4
+  0016 10               DC.B  L27
+  0017 03               DC.B  L1B
+  0018 05               DC.B  L1E
+  0019 07               DC.B  L21
+  001a 09               DC.B  L24
+  001b          L1B:    
+  291:      /* »ù±¾ÐÅÏ¢ */
+  292:      case  0:  lf_vMngExec700_PI_Info();  break;
+  001b cc0000   [4]             JMP   lf_vMngExec700_PI_Info
+  001e          L1E:    
+  293:      /* »ù±¾²Ù×÷ */
+  294:      case  1:  lf_vMngExec700_PI_Oper();  break;
+  001e cc0000   [4]             JMP   lf_vMngExec700_PI_Oper
+  0021          L21:    
+  295:      /* ¶ÁÈ¡²ÎÊý */
+  296:      case  2:  lf_vMngExec700_PI_Read();  break;
+  0021 cc0000   [4]             JMP   lf_vMngExec700_PI_Read
+  0024          L24:    
+  297:      /* Ð´Èë²ÎÊý */
+  298:      case  3:  lf_vMngExec700_PI_Write(); break;
+  0024 cc0000   [4]             JMP   lf_vMngExec700_PI_Write
+  0027          L27:    
+  299:      default:  break;
+  300:    }
+  301:  }
+  0027 81       [6]             RTS   
+  302:  
+  303:  static void lf_vMngExec700_SC(void)
+  304:  {
+
+Function: lf_vMngExec700_SC
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  305:  }
+  0000 81       [6]             RTS   
+  306:  
+  307:  unsigned char mng_crx_proc(void)
+  308:  {
+
+Function: mng_crx_proc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 a7f2     [2]             AIS   #-14
+  309:  
+  310:    unsigned char exit = 0;
+  0002 95       [2]             TSX   
+  0003 6f0d     [5]             CLR   13,X
+  311:  
+  312:    /* ÓÐÊý¾ÝÊ±£¬¿ªÊ¼´¦Àí */
+  313:    if( mng.can.re ){  
+  0005 c60010   [4]             LDA   mng:16
+  0008 2751     [3]             BEQ   L5B ;abs = 005b
+  314:      unsigned long id;
+  315:      unsigned short mngfd[6];
+  316:      unsigned char i;
+  317:      LED_BLUE = LED_ON;
+  000a 1500     [5]             BCLR  2,_PTDD
+  318:      /* Ö»´¦Àí±ê×¼Ö¡ */
+  319:      id = mng.can.rxm.id;
+  320:      mngfd[0] = mng.can.rxm.data[0];
+  000c c60005   [4]             LDA   mng:5
+  000f 8c       [1]             CLRH  
+  0010 97       [1]             TAX   
+  0011 9eff01   [5]             STHX  1,SP
+  321:      mngfd[0] |= mng.can.rxm.data[1];
+  0014 c60006   [4]             LDA   mng:6
+  0017 95       [2]             TSX   
+  0018 ea01     [3]             ORA   1,X
+  001a e701     [3]             STA   1,X
+  001c f6       [3]             LDA   ,X
+  001d f7       [2]             STA   ,X
+  322:      
+  323:      if (mngfd[0]>1000) {
+  001e 9efe01   [5]             LDHX  1,SP
+  0021 6503e8   [3]             CPHX  #1000
+  0024 232b     [3]             BLS   L51 ;abs = 0051
+  324:      mng.can.txm.id = 0x012;
+  0026 ae12     [2]             LDX   #18
+  0028 8c       [1]             CLRH  
+  0029 960013   [5]             STHX  mng:19
+  002c 5f       [1]             CLRX  
+  002d 960011   [5]             STHX  mng:17
+  325:      mng.can.txm.dlc = 8;
+  0030 a608     [2]             LDA   #8
+  0032 c70015   [4]             STA   mng:21
+  326:      for(i=0;i<8;i++) mng.can.txm.data[i] = 1;
+  0035 95       [2]             TSX   
+  0036 6f0c     [5]             CLR   12,X
+  0038          L38:    
+  0038 ee0c     [3]             LDX   12,X
+  003a 8c       [1]             CLRH  
+  003b a601     [2]             LDA   #1
+  003d d70016   [4]             STA   @mng:22,X
+  0040 95       [2]             TSX   
+  0041 6c0c     [5]             INC   12,X
+  0043 e60c     [3]             LDA   12,X
+  0045 a108     [2]             CMP   #8
+  0047 25ef     [3]             BCS   L38 ;abs = 0038
+  327:      (void)can_xmit(&mng.can.txm);
+  0049 450011   [3]             LDHX  @mng:17
+  004c cd0000   [6]             JSR   can_xmit
+  328:      LED_GREEN = LED_OFF;
+  004f 1600     [5]             BSET  3,_PTDD
+  0051          L51:    
+  329:      }
+  330:    
+  331:     
+  332:      mng.can.re = 0;
+  0051 4f       [1]             CLRA  
+  0052 c70010   [4]             STA   mng:16
+  333:      mng.can.we = 1;
+  0055 4c       [1]             INCA  
+  0056 c7000f   [4]             STA   mng:15
+  334:      LED_BLUE = LED_OFF;
+  0059 1400     [5]             BSET  2,_PTDD
+  005b          L5B:    
+  335:    }
+  336:  
+  337:    return exit;
+  005b 95       [2]             TSX   
+  005c e60d     [3]             LDA   13,X
+  338:  }
+  005e a70e     [2]             AIS   #14
+  0060 81       [6]             RTS   
+  339:  
+  340:  void mng_init(void)
+  341:  {
+
+Function: mng_init
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  342:    mng.can.re = 0;
+  0000 4f       [1]             CLRA  
+  0001 c70010   [4]             STA   mng:16
+  343:    mng.can.we = 1;
+  0004 4c       [1]             INCA  
+  0005 c7000f   [4]             STA   mng:15
+  344:    (void)can_init();
+  0008 cd0000   [6]             JSR   can_init
+  345:    dec_tick = 300; //  3 sec
+  000b 45012c   [3]             LDHX  #300
+  000e 960002   [5]             STHX  dec_tick:2
+  0011 5f       [1]             CLRX  
+  0012 8c       [1]             CLRH  
+  0013 960000   [5]             STHX  dec_tick
+  346:  }
+  0016 81       [6]             RTS   
+  347:  
+  348:  void mng_reset(void)
+  349:  {
+
+Function: mng_reset
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  350:    (void)can_reset();
+  0000 cc0000   [4]             JMP   can_reset
+  351:  }
+  352:  
+  353:  void mng_info(void)
+  354:  {
+
+Function: mng_info
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\mng.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\mng.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  355:    unsigned char i;
+  356:  
+  357:    if( dec_tick==0 ){
+  0001 450000   [3]             LDHX  @dec_tick
+  0004 e603     [3]             LDA   3,X
+  0006 ea02     [3]             ORA   2,X
+  0008 ea01     [3]             ORA   1,X
+  000a fa       [3]             ORA   ,X
+  000b 263f     [3]             BNE   L4C ;abs = 004c
+  358:      dec_tick = 300;
+  000d 45012c   [3]             LDHX  #300
+  0010 960002   [5]             STHX  dec_tick:2
+  0013 5f       [1]             CLRX  
+  0014 8c       [1]             CLRH  
+  0015 960000   [5]             STHX  dec_tick
+  359:  
+  360:      //  serial number
+  361:      LED_GREEN = LED_ON;
+  0018 1700     [5]             BCLR  3,_PTDD
+  362:      mng.can.txm.id = 0x500+(gv_sSC.sWX.bModNum<<4)+0;
+  001a c60118   [4]             LDA   gv_sSC:280
+  001d ae10     [2]             LDX   #16
+  001f 42       [5]             MUL   
+  0020 87       [2]             PSHA  
+  0021 9f       [1]             TXA   
+  0022 ab05     [2]             ADD   #5
+  0024 97       [1]             TAX   
+  0025 cd0000   [6]             JSR   _SEXT16_32
+  0028 450011   [3]             LDHX  @mng:17
+  002b cd0000   [6]             JSR   _POP32
+  363:      mng.can.txm.dlc = 8;
+  002e a608     [2]             LDA   #8
+  0030 c70015   [4]             STA   mng:21
+  364:      for(i=0;i<8;i++) mng.can.txm.data[i] = gv_sPI.baSN[i];
+  0033 95       [2]             TSX   
+  0034 7f       [4]             CLR   ,X
+  0035          L35:    
+  0035 fe       [3]             LDX   ,X
+  0036 8c       [1]             CLRH  
+  0037 d60010   [4]             LDA   @gv_sPI:16,X
+  003a d70016   [4]             STA   @mng:22,X
+  003d 95       [2]             TSX   
+  003e 7c       [4]             INC   ,X
+  003f f6       [3]             LDA   ,X
+  0040 a108     [2]             CMP   #8
+  0042 25f1     [3]             BCS   L35 ;abs = 0035
+  365:      (void)can_xmit(&mng.can.txm);
+  0044 450011   [3]             LDHX  @mng:17
+  0047 cd0000   [6]             JSR   can_xmit
+  366:      LED_GREEN = LED_OFF;
+  004a 1600     [5]             BSET  3,_PTDD
+  004c          L4C:    
+  367:  
+  368:    }
+  369:  }
+  004c 8a       [3]             PULH  
+  004d 81       [6]             RTS   
+  370:  

@@ -1,0 +1,46 @@
+1. New Project
+1.1. File -> New Project
+
+2. Device and Connection
+2.1. (Device)HCS08 -> HCS08D Family -> MC9S08DZ60
+2.2. (Connections)P&E Multilink/Cyclone Pro
+
+3. Project Parameters
+3.1. Set of languages: C
+3.2. Project name and location
+
+4. Add Additional Files
+4.1. Add no files
+4.2. Copy files to project
+4.3. Create main file
+
+5. Processor Expert
+5.1. Rapid Application Development Options: None
+
+6. C/C++ Options
+6.1. startup code: ANSI
+6.2. memory mode: small
+6.3. floating point: None
+
+7. PC-Lint
+7.1. create for PC-lint: No
+
+8. Create groups
+- 01 Document
+- 02 CodeWarrior
+- 03 Libraries
+- 04 Modules
+- 05 Devices
+- 06 Platform
+- 07 Applications
+
+9. Move files
+9.1. Delete Includes group
+9.2. Move main.c to Platform
+9.3. Move ansiis.lib and MC9S08DZ60.C to Libraries
+9.4. Move Start80.c to CodeWarrior
+9.5. Move burner.bbl and Project.* to CodeWarrior
+
+10. Edit stack size
+10.1. Edit STACKSIZE in Project.prm to 0x400 (1KB)
+

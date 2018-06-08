@@ -1,0 +1,1133 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    NTC.c
+    5:    * ver     1.0
+    6:    * brief   This is a NTC file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _NTC_C_ 0x53
+   13:  #define FILE_No _NTC_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "ntc.h"  /* mandotary */
+   17:  #include  "mcu.h"
+   18:  
+   19:  /* Private Macros & Defines --------------------------------------------------*/
+   20:  
+   21:  #define   NTC_CURVE_MAX   3
+   22:  
+   23:  #ifndef   TUNE_NTC
+   24:  #define   TUNE_NTC    0
+   25:  #endif
+   26:  
+   27:  #if   TUNE_NTC
+   28:  #define   NTC_PRINTF  PRINTF
+   29:  #else
+   30:  #define   NTC_PRINTF  empty_printf
+   31:  #endif
+   32:  
+   33:  /* Private typedefs ----------------------------------------------------------*/
+   34:  
+   35:  typedef struct
+   36:  {
+   37:    signed char  t;  //  -128C ~ 127C
+   38:    unsigned long r; //  1 ohm/bit
+   39:  }
+   40:  temp_node_t;
+   41:  
+   42:  typedef struct
+   43:  {
+   44:    char * name;
+   45:    temp_node_t * curve;
+   46:    unsigned char length;
+   47:  }
+   48:  temp_curve_t;
+   49:  
+   50:  /* Private consts ------------------------------------------------------------*/
+   51:  
+   52:  //  CWF4-103F-4150F/¦µ6-L1000
+   53:  const temp_node_t temp_curve_cwf4[] = 
+   54:  {
+   55:    { -55,1104010 },
+   56:    { -54,1026770 },
+   57:    { -53,955265 },
+   58:    { -52,889040 },
+   59:    { -51,827693 },
+   60:    { -50,770849 },
+   61:    { -49,718161 },
+   62:    { -48,669311 },
+   63:    { -47,624006 },
+   64:    { -46,581976 },
+   65:    { -45,542972 },
+   66:    { -44,506765 },
+   67:    { -43,473143 },
+   68:    { -42,441913 },
+   69:    { -41,412894 },
+   70:    { -40,385921 },
+   71:    { -39,360842 },
+   72:    { -38,337516 },
+   73:    { -37,315813 },
+   74:    { -36,295614 },
+   75:    { -35,276807 },
+   76:    { -34,259292 },
+   77:    { -33,242974 },
+   78:    { -32,227765 },
+   79:    { -31,213586 },
+   80:    { -30,200363 },
+   81:    { -29,188027 },
+   82:    { -28,176513 },
+   83:    { -27,165765 },
+   84:    { -26,155727 },
+   85:    { -25,146350 },
+   86:    { -24,137586 },
+   87:    { -23,129393 },
+   88:    { -22,121731 },
+   89:    { -21,114564 },
+   90:    { -20,107856 },
+   91:    { -19,101577 },
+   92:    { -18,95697 },
+   93:    { -17,90189 },
+   94:    { -16,85027 },
+   95:    { -15,80188 },
+   96:    { -14,75651 },
+   97:    { -13,71394 },
+   98:    { -12,67401 },
+   99:    { -11,63652 },
+  100:    { -10,60131 },
+  101:    { -9,56825  },
+  102:    { -8,53718  },
+  103:    { -7,50798  },
+  104:    { -6,48052  },
+  105:    { -5,45470  },
+  106:    { -4,43041  },
+  107:    { -3,40754  },
+  108:    { -2,38601  },
+  109:    { -1,36574  },
+  110:    { 0,34665   },
+  111:    { 1,32865   },
+  112:    { 2,31168   },
+  113:    { 3,29569   },
+  114:    { 4,28060   },
+  115:    { 5,26636   },
+  116:    { 6,25293   },
+  117:    { 7,24024  },
+  118:    { 8,22826  },
+  119:    { 9,21694  },
+  120:    { 10,20690 },
+  121:    { 11,19613 },
+  122:    { 12,18658 },
+  123:    { 13,17753 },
+  124:    { 14,16898 },
+  125:    { 15,16088 },
+  126:    { 16,15322 },
+  127:    { 17,14596 },
+  128:    { 18,13909 },
+  129:    { 19,13257 },
+  130:    { 20,12640 },
+  131:    { 21,12055 },
+  132:    { 22,11500 },
+  133:    { 23,10973 },
+  134:    { 24,10474 },
+  135:    { 25,10000 },
+  136:    { 26,9549  },
+  137:    { 27,9122 },
+  138:    { 28,8716 },
+  139:    { 29,8330 },
+  140:    { 30,7964 },
+  141:    { 31,7615 },
+  142:    { 32,7284 },
+  143:    { 33,6968 },
+  144:    { 34,6669 },
+  145:    { 35,6383 },
+  146:    { 36,6112 },
+  147:    { 37,5853 },
+  148:    { 38,5607 },
+  149:    { 39,5372 },
+  150:    { 40,5148 },
+  151:    { 41,4935 },
+  152:    { 42,4732 },
+  153:    { 43,4538 },
+  154:    { 44,4353 },
+  155:    { 45,4177 },
+  156:    { 46,4009 },
+  157:    { 47,3848 },
+  158:    { 48,3695 },
+  159:    { 49,3549 },
+  160:    { 50,3410 },
+  161:    { 51,3275 },
+  162:    { 52,3148 },
+  163:    { 53,3026 },
+  164:    { 54,2909 },
+  165:    { 55,2797 },
+  166:    { 56,2691 },
+  167:    { 57,2588 },
+  168:    { 58,2491 },
+  169:    { 59,2397 },
+  170:    { 60,2308 },
+  171:    { 61,2222 },
+  172:    { 62,2140 },
+  173:    { 63,2061 },
+  174:    { 64,1986 },
+  175:    { 65,1914 },
+  176:    { 66,1845 },
+  177:    { 67,1778 },
+  178:    { 68,1715 },
+  179:    { 69,1654 },
+  180:    { 70,1595 },
+  181:    { 71,1539 },
+  182:    { 72,1485 },
+  183:    { 73,1433 },
+  184:    { 74,1383 },
+  185:    { 75,1336 },
+  186:    { 76,1290 },
+  187:    { 77,1246 },
+  188:    { 78,1203 },
+  189:    { 79,1163 },
+  190:    { 80,1124 },
+  191:    { 81,1086 },
+  192:    { 82,1050 },
+  193:    { 83,1015 },
+  194:    { 84,982  },
+  195:    { 85,950  },
+  196:    { 86,919  },
+  197:    { 87,889  },
+  198:    { 88,860  },
+  199:    { 89,832  },
+  200:    { 90,806  },
+  201:    { 91,780  },
+  202:    { 92,755  },
+  203:    { 93,732  },
+  204:    { 94,709  },
+  205:    { 95,687  },
+  206:    { 96,665  },
+  207:    { 97,645  },
+  208:    { 98,625  },
+  209:    { 99,606  },
+  210:    { 100,588 },
+  211:    { 101,570 },
+  212:    { 102,553 },
+  213:    { 103,536 },
+  214:    { 104,520 },
+  215:    { 105,505 },
+  216:    { 106,490 },
+  217:    { 107,475 },
+  218:    { 108,461 },
+  219:    { 109,448 },
+  220:    { 110,435 },
+  221:    { 111,422 },
+  222:    { 112,410 },
+  223:    { 113,399 },
+  224:    { 114,387 },
+  225:    { 115,376 },
+  226:    { 116,366 },
+  227:    { 117,355 },
+  228:    { 118,346 },
+  229:    { 119,336 },
+  230:    { 120,327 },
+  231:    { 121,318 },
+  232:    { 122,309 },
+  233:    { 123,301 },
+  234:    { 124,292 },
+  235:    { 125,285 },
+  236:  };
+  237:  
+  238:  //  epcos
+  239:  const temp_node_t temp_curve_epcos[] = {
+  240:  //	T		R	
+  241:  { -40,188500 },
+  242:  { -39,178500 },
+  243:  { -38,169000 },
+  244:  { -37,160200 },
+  245:  { -36,151900 },
+  246:  { -35,144100 },
+  247:  { -34,136700 },
+  248:  { -33,129800 },
+  249:  { -32,123300 },
+  250:  { -31,117100 },
+  251:  { -30,111300 },
+  252:  { -29,105700 },
+  253:  { -28,100500 },
+  254:  { -27,95520 },
+  255:  { -26,90840 },
+  256:  { -25,86430 },
+  257:  { -24,82260 },
+  258:  { -23,78330 },
+  259:  { -22,74610 },
+  260:  { -21,71100 },
+  261:  { -20,67770 },
+  262:  { -19,64570 },
+  263:  { -18,61540 },
+  264:  { -17,58680 },
+  265:  { -16,55970 },
+  266:  { -15,53410 },
+  267:  { -14,50980 },
+  268:  { -13,48680 },
+  269:  { -12,46500 },
+  270:  { -11,44430 },
+  271:  { -10,42470 },
+  272:  { -9,40570 },
+  273:  { -8,38770 },
+  274:  { -7,37060 },
+  275:  { -6,35440 },
+  276:  { -5,33900 },
+  277:  { -4,32440 },
+  278:  { -3,31050 },
+  279:  { -2,29730 },
+  280:  { -1,28480 },
+  281:  { 0,27280 },
+  282:  { 1,26130 },
+  283:  { 2,25030 },
+  284:  { 3,23990 },
+  285:  { 4,23000 },
+  286:  { 5,22050 },
+  287:  { 6,21150 },
+  288:  { 7,20300 },
+  289:  { 8,19480 },
+  290:  { 9,18700 },
+  291:  { 10,17960 },
+  292:  { 11,17240 },
+  293:  { 12,16560 },
+  294:  { 13,15900 },
+  295:  { 14,15280 },
+  296:  { 15,14690 },
+  297:  { 16,14120 },
+  298:  { 17,13580 },
+  299:  { 18,13060 },
+  300:  { 19,12560 },
+  301:  { 20,12090 },
+  302:  { 21,11630 },
+  303:  { 22,11200 },
+  304:  { 23,10780 },
+  305:  { 24,10380 },
+  306:  { 25,10000 },
+  307:  { 26,9632 },
+  308:  { 27,9281 },
+  309:  { 28,8944 },
+  310:  { 29,8622 },
+  311:  { 30,8313 },
+  312:  { 31,8014 },
+  313:  { 32,7728 },
+  314:  { 33,7454 },
+  315:  { 34,7192 },
+  316:  { 35,6940 },
+  317:  { 36,6699 },
+  318:  { 37,6467 },
+  319:  { 38,6245 },
+  320:  { 39,6032 },
+  321:  { 40,5827 },
+  322:  { 41,5629 },
+  323:  { 42,5438 },
+  324:  { 43,5255 },
+  325:  { 44,5080 },
+  326:  { 45,4911 },
+  327:  { 46,4749 },
+  328:  { 47,4593 },
+  329:  { 48,4443 },
+  330:  { 49,4299 },
+  331:  { 50,4160 },
+  332:  { 51,4026 },
+  333:  { 52,3896 },
+  334:  { 53,3771 },
+  335:  { 54,3651 },
+  336:  { 55,3536 },
+  337:  { 56,3425 },
+  338:  { 57,3318 },
+  339:  { 58,3215 },
+  340:  { 59,3116 },
+  341:  { 60,3020 },
+  342:  { 61,2927 },
+  343:  { 62,2838 },
+  344:  { 63,2751 },
+  345:  { 64,2668 },
+  346:  { 65,2588 },
+  347:  { 66,2511 },
+  348:  { 67,2436 },
+  349:  { 68,2364 },
+  350:  { 69,2295 },
+  351:  { 70,2228 },
+  352:  { 71,2163 },
+  353:  { 72,2100 },
+  354:  { 73,2039 },
+  355:  { 74,1980 },
+  356:  { 75,1924 },
+  357:  { 76,1869 },
+  358:  { 77,1816 },
+  359:  { 78,1765 },
+  360:  { 79,1716 },
+  361:  { 80,1668 },
+  362:  { 81,1622 },
+  363:  { 82,1577 },
+  364:  { 83,1533 },
+  365:  { 84,1492 },
+  366:  { 85,1451 },
+  367:  { 86,1412 },
+  368:  { 87,1373 },
+  369:  { 88,1336 },
+  370:  { 89,1301 },
+  371:  { 90,1266 },
+  372:  { 91,1232 },
+  373:  { 92,1200 },
+  374:  { 93,1168 },
+  375:  { 94,1137 },
+  376:  { 95,1108 },
+  377:  { 96,1079 },
+  378:  { 97,1051 },
+  379:  { 98,1024 },
+  380:  { 99,998.4 },
+  381:  { 100,973.1 },
+  382:  { 101,948.4 },
+  383:  { 102,924.6 },
+  384:  { 103,901.4 },
+  385:  { 104,878.9 },
+  386:  { 105,857.2 },
+  387:  { 106,836 },
+  388:  { 107,815.5 },
+  389:  { 108,795.6 },
+  390:  { 109,776.3 },
+  391:  { 110,757.6 },
+  392:  };
+  393:  
+  394:  //  muRata NXFT15XH103
+  395:  const temp_node_t temp_curve_muRata[] = {
+  396:  //	T		R	
+  397:  {	-40	,	197388	},
+  398:  {	-35	,	149395	},
+  399:  {	-30	,	114345	},
+  400:  {	-25	,	88381	},
+  401:  {	-20	,	68915	},
+  402:  {	-15	,	54166	},
+  403:  {	-10	,	42899	},
+  404:  {	-5	,	34196	},
+  405:  {	0	,	27455	},
+  406:  {	5	,	22165	},
+  407:  {	10	,	18010	},
+  408:  {	15	,	14720	},
+  409:  {	20	,	12099	},
+  410:  {	25	,	10000	},
+  411:  {	30	,	8309	},
+  412:  {	35	,	6939	},
+  413:  {	40	,	5824	},
+  414:  {	45	,	4911	},
+  415:  {	50	,	4160	},
+  416:  {	55	,	3539	},
+  417:  {	60	,	3024	},
+  418:  {	65	,	2593	},
+  419:  {	70	,	2233	},
+  420:  {	75	,	1929	},
+  421:  {	80	,	1673	},
+  422:  {	85	,	1455	},
+  423:  {	90	,	1270	},
+  424:  {	95	,	1112	},
+  425:  {	100	,	976	},
+  426:  {	105	,	860	},
+  427:  {	110	,	759	},
+  428:  {	115	,	673	},
+  429:  {	120	,	598	},
+  430:  {	125	,	532	},
+  431:  };
+  432:  
+  433:  
+  434:  const temp_curve_t temp_curve[NTC_CURVE_MAX] = 
+  435:  {
+  436:    {
+  437:      "CWF4-103F-4150F/¦µ6-L1000",
+  438:      (temp_node_t*)temp_curve_cwf4,
+  439:      sizeof(temp_curve_cwf4)/sizeof(temp_node_t),
+  440:    },
+  441:    {
+  442:      "EPCOS",
+  443:      (temp_node_t*)temp_curve_epcos,
+  444:      sizeof(temp_curve_epcos)/sizeof(temp_node_t),
+  445:    },
+  446:    {
+  447:      "MURATA-NXFT15XH103",
+  448:      (temp_node_t*)temp_curve_muRata,
+  449:      sizeof(temp_curve_muRata)/sizeof(temp_node_t),
+  450:    },
+  451:  };
+  452:  
+  453:  
+  454:  /* Private variables ---------------------------------------------------------*/
+  455:  
+  456:  /* Private function prototypes -----------------------------------------------*/
+  457:  
+  458:  /* Global consts -------------------------------------------------------------*/
+  459:  
+  460:  /* Global variables ----------------------------------------------------------*/
+  461:  
+  462:  /* Functions -----------------------------------------------------------------*/
+  463:  
+  464:  /**
+  465:    * bref    NTC function
+  466:    * param   none
+  467:    * retval  none
+  468:    */
+  469:  
+  470:  static unsigned char ntc_search(unsigned long res, temp_node_t * curve, unsigned char length)
+  471:  {
+
+Function: ntc_search
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices\ntc.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ntc.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 8b       [2]             PSHH  
+  0002 a7fa     [2]             AIS   #-6
+  472:    unsigned char a, b;
+  473:    unsigned short c;
+  474:    
+  475:    a = 0;
+  0004 95       [2]             TSX   
+  0005 6f02     [5]             CLR   2,X
+  476:    b = length-1;
+  0007 4a       [1]             DECA  
+  0008 e703     [3]             STA   3,X
+  477:  
+  478:    NTC_PRINTF("NTC: ");
+  000a 450000   [3]             LDHX  @"NTC: "
+  000d 89       [2]             PSHX  
+  000e 8b       [2]             PSHH  
+  000f cd0000   [6]             JSR   empty_printf
+  0012 a702     [2]             AIS   #2
+  479:  
+  480:    if( res > curve[a].r ) return a;
+  0014 95       [2]             TSX   
+  0015 af0a     [2]             AIX   #10
+  0017 89       [2]             PSHX  
+  0018 8b       [2]             PSHH  
+  0019 9efe09   [5]             LDHX  9,SP
+  001c af01     [2]             AIX   #1
+  001e cd0000   [6]             JSR   _LCMP
+  0021 2403     [3]             BCC   L26 ;abs = 0026
+  0023 4f       [1]             CLRA  
+  0024 2043     [3]             BRA   L69 ;abs = 0069
+  0026          L26:    
+  481:    if( res < curve[b].r ) return b;
+  0026 95       [2]             TSX   
+  0027 e603     [3]             LDA   3,X
+  0029 ae05     [2]             LDX   #5
+  002b 42       [5]             MUL   
+  002c 9eeb08   [4]             ADD   8,SP
+  002f 87       [2]             PSHA  
+  0030 9f       [1]             TXA   
+  0031 95       [2]             TSX   
+  0032 e907     [3]             ADC   7,X
+  0034 cd00ce   [6]             JSR   LCE ;abs = 00ce
+  0037 8a       [3]             PULH  
+  0038 2374     [3]             BLS   LAE ;abs = 00ae
+  003a 95       [2]             TSX   
+  003b e603     [3]             LDA   3,X
+  003d 202a     [3]             BRA   L69 ;abs = 0069
+  003f          L3F:    
+  482:  
+  483:    for(;;){
+  484:  
+  485:  //    DBG_PRINTF("%d|%d,",a,b);
+  486:      NTC_PRINTF("%d|%d,",a,b);
+  003f 95       [2]             TSX   
+  0040 e603     [3]             LDA   3,X
+  0042 87       [2]             PSHA  
+  0043 5f       [1]             CLRX  
+  0044 89       [2]             PSHX  
+  0045 9ee605   [4]             LDA   5,SP
+  0048 87       [2]             PSHA  
+  0049 89       [2]             PSHX  
+  004a 450000   [3]             LDHX  @"%d|%d,"
+  004d 89       [2]             PSHX  
+  004e 8b       [2]             PSHH  
+  004f cd0000   [6]             JSR   empty_printf
+  0052 a706     [2]             AIS   #6
+  487:  
+  488:      if( a+1==b ) return a;
+  0054 95       [2]             TSX   
+  0055 e602     [3]             LDA   2,X
+  0057 8c       [1]             CLRH  
+  0058 97       [1]             TAX   
+  0059 af01     [2]             AIX   #1
+  005b 89       [2]             PSHX  
+  005c 8b       [2]             PSHH  
+  005d 95       [2]             TSX   
+  005e e605     [3]             LDA   5,X
+  0060 5f       [1]             CLRX  
+  0061 cd0000   [6]             JSR   _ICMP
+  0064 2605     [3]             BNE   L6B ;abs = 006b
+  0066 95       [2]             TSX   
+  0067 e602     [3]             LDA   2,X
+  0069          L69:    
+  0069 2060     [3]             BRA   LCB ;abs = 00cb
+  006b          L6B:    
+  489:      c = (a+b+1)/2;
+  006b 95       [2]             TSX   
+  006c e603     [3]             LDA   3,X
+  006e eb02     [3]             ADD   2,X
+  0070 87       [2]             PSHA  
+  0071 4f       [1]             CLRA  
+  0072 a900     [2]             ADC   #0
+  0074 87       [2]             PSHA  
+  0075 8a       [3]             PULH  
+  0076 88       [3]             PULX  
+  0077 af01     [2]             AIX   #1
+  0079 89       [2]             PSHX  
+  007a 8b       [2]             PSHH  
+  007b ae02     [2]             LDX   #2
+  007d 8c       [1]             CLRH  
+  007e cd0000   [6]             JSR   _IDIVS_STAR08
+  0081 a702     [2]             AIS   #2
+  0083 9eff05   [5]             STHX  5,SP
+  490:      if( res > curve[c].r ){ b = (unsigned char)c; continue; }
+  0086 9eff01   [5]             STHX  1,SP
+  0089 ae05     [2]             LDX   #5
+  008b 8c       [1]             CLRH  
+  008c 89       [2]             PSHX  
+  008d 8b       [2]             PSHH  
+  008e 9efe03   [5]             LDHX  3,SP
+  0091 cd0000   [6]             JSR   _IMUL_STAR08
+  0094 a702     [2]             AIS   #2
+  0096 9f       [1]             TXA   
+  0097 9eeb08   [4]             ADD   8,SP
+  009a 87       [2]             PSHA  
+  009b 8b       [2]             PSHH  
+  009c 86       [3]             PULA  
+  009d 9ee908   [4]             ADC   8,SP
+  00a0 9eff02   [5]             STHX  2,SP
+  00a3 95       [2]             TSX   
+  00a4 ad28     [5]             BSR   LCE ;abs = 00ce
+  00a6 8a       [3]             PULH  
+  00a7 2407     [3]             BCC   LB0 ;abs = 00b0
+  00a9 95       [2]             TSX   
+  00aa e605     [3]             LDA   5,X
+  00ac e703     [3]             STA   3,X
+  00ae          LAE:    
+  491:      if( res < curve[c].r ){ a = (unsigned char)c; continue; }
+  492:      return (unsigned char)c;
+  493:  
+  494:    }  
+  00ae 208f     [3]             BRA   L3F ;abs = 003f
+  00b0          LB0:    
+  00b0 95       [2]             TSX   
+  00b1 e601     [3]             LDA   1,X
+  00b3 fe       [3]             LDX   ,X
+  00b4 9eeb08   [4]             ADD   8,SP
+  00b7 87       [2]             PSHA  
+  00b8 9f       [1]             TXA   
+  00b9 95       [2]             TSX   
+  00ba e907     [3]             ADC   7,X
+  00bc ad10     [5]             BSR   LCE ;abs = 00ce
+  00be 8a       [3]             PULH  
+  00bf 2307     [3]             BLS   LC8 ;abs = 00c8
+  00c1 95       [2]             TSX   
+  00c2 e605     [3]             LDA   5,X
+  00c4 e702     [3]             STA   2,X
+  00c6 20e6     [3]             BRA   LAE ;abs = 00ae
+  00c8          LC8:    
+  00c8 95       [2]             TSX   
+  00c9 e605     [3]             LDA   5,X
+  00cb          LCB:    
+  495:  
+  496:  }
+  00cb a708     [2]             AIS   #8
+  00cd 81       [6]             RTS   
+  00ce          LCE:    
+  00ce af0b     [2]             AIX   #11
+  00d0 89       [2]             PSHX  
+  00d1 8b       [2]             PSHH  
+  00d2 87       [2]             PSHA  
+  00d3 95       [2]             TSX   
+  00d4 ee05     [3]             LDX   5,X
+  00d6 8a       [3]             PULH  
+  00d7 af01     [2]             AIX   #1
+  00d9 cd0000   [6]             JSR   _LCMP
+  00dc 81       [6]             RTS   
+  497:  
+  498:  static signed short ntc_insert(unsigned long res, temp_node_t * curve, unsigned char pos, unsigned char length)
+  499:  {
+
+Function: ntc_insert
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices\ntc.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ntc.c.o" -WmsgSd1106
+
+  0000 89       [2]             PSHX  
+  0001 87       [2]             PSHA  
+  0002 a7e8     [2]             AIS   #-24
+  500:  
+  501:    signed short ta, tb;
+  502:    signed long  ra, rb;
+  503:    signed long  tmp1, tmp2;
+  504:    
+  505:    if( pos>length-1 ){
+  0004 8c       [1]             CLRH  
+  0005 97       [1]             TAX   
+  0006 afff     [2]             AIX   #-1
+  0008 9eef01   [4]             STX   1,SP
+  000b 9eee1a   [4]             LDX   26,SP
+  000e 89       [2]             PSHX  
+  000f 4f       [1]             CLRA  
+  0010 87       [2]             PSHA  
+  0011 8b       [2]             PSHH  
+  0012 95       [2]             TSX   
+  0013 e603     [3]             LDA   3,X
+  0015 88       [3]             PULX  
+  0016 cd0000   [6]             JSR   _ICMP
+  0019 9022     [3]             BGE   L3D ;abs = 003d
+  506:      PWARNO(WARNO_INDEX_OVERFLOW,pos);
+  001b ae01     [2]             LDX   #1
+  001d 8c       [1]             CLRH  
+  001e 89       [2]             PSHX  
+  001f 8b       [2]             PSHH  
+  0020 ae53     [2]             LDX   #83
+  0022 89       [2]             PSHX  
+  0023 8b       [2]             PSHH  
+  0024 450000   [3]             LDHX  @"C:\Users\Administrator\Desktop\Fms\FMS\\260\302\314\25110V3T\05 Devices\ntc.c"
+  0027 89       [2]             PSHX  
+  0028 8b       [2]             PSHH  
+  0029 4501fa   [3]             LDHX  #506
+  002c 89       [2]             PSHX  
+  002d 8b       [2]             PSHH  
+  002e 95       [2]             TSX   
+  002f ee21     [3]             LDX   33,X
+  0031 8c       [1]             CLRH  
+  0032 cd0000   [6]             JSR   pwarno
+  0035 a708     [2]             AIS   #8
+  507:      pos = length-1;
+  0037 95       [2]             TSX   
+  0038 e618     [3]             LDA   24,X
+  003a 4a       [1]             DECA  
+  003b e719     [3]             STA   25,X
+  003d          L3D:    
+  508:    }
+  509:    ta = curve[pos].t * 10;
+  003d 95       [2]             TSX   
+  003e e619     [3]             LDA   25,X
+  0040 ae05     [2]             LDX   #5
+  0042 42       [5]             MUL   
+  0043 9ee701   [4]             STA   1,SP
+  0046 9eeb1e   [4]             ADD   30,SP
+  0049 87       [2]             PSHA  
+  004a 9f       [1]             TXA   
+  004b 9ee91e   [4]             ADC   30,SP
+  004e 87       [2]             PSHA  
+  004f 9eef04   [4]             STX   4,SP
+  0052 8a       [3]             PULH  
+  0053 88       [3]             PULX  
+  0054 f6       [3]             LDA   ,X
+  0055 ae0a     [2]             LDX   #10
+  0057 cd0000   [6]             JSR   _BMULS
+  005a 89       [2]             PSHX  
+  005b 8a       [3]             PULH  
+  005c 97       [1]             TAX   
+  005d 9eff0b   [5]             STHX  11,SP
+  510:    if( pos==length-1 ) return ta;
+  0060 9ee619   [4]             LDA   25,SP
+  0063 87       [2]             PSHA  
+  0064 4f       [1]             CLRA  
+  0065 87       [2]             PSHA  
+  0066 8b       [2]             PSHH  
+  0067 86       [3]             PULA  
+  0068 9ee705   [4]             STA   5,SP
+  006b 86       [3]             PULA  
+  006c 8c       [1]             CLRH  
+  006d 9eef05   [4]             STX   5,SP
+  0070 88       [3]             PULX  
+  0071 afff     [2]             AIX   #-1
+  0073 9ee61a   [4]             LDA   26,SP
+  0076 87       [2]             PSHA  
+  0077 4f       [1]             CLRA  
+  0078 87       [2]             PSHA  
+  0079 9f       [1]             TXA   
+  007a 8b       [2]             PSHH  
+  007b 88       [3]             PULX  
+  007c cd0000   [6]             JSR   _ICMP
+  007f 260a     [3]             BNE   L8B ;abs = 008b
+  0081 95       [2]             TSX   
+  0082 e603     [3]             LDA   3,X
+  0084 ee02     [3]             LDX   2,X
+  0086 89       [2]             PSHX  
+  0087 8a       [3]             PULH  
+  0088 97       [1]             TAX   
+  0089 2024     [3]             BRA   LAF ;abs = 00af
+  008b          L8B:    
+  511:    if( pos==0 && res>curve[pos].r ) return ta;
+  008b 95       [2]             TSX   
+  008c 6d19     [4]             TST   25,X
+  008e 2622     [3]             BNE   LB2 ;abs = 00b2
+  0090 f6       [3]             LDA   ,X
+  0091 ee01     [3]             LDX   1,X
+  0093 9eeb1e   [4]             ADD   30,SP
+  0096 87       [2]             PSHA  
+  0097 9f       [1]             TXA   
+  0098 95       [2]             TSX   
+  0099 e91d     [3]             ADC   29,X
+  009b af1f     [2]             AIX   #31
+  009d 89       [2]             PSHX  
+  009e 8b       [2]             PSHH  
+  009f 87       [2]             PSHA  
+  00a0 95       [2]             TSX   
+  00a1 ee03     [3]             LDX   3,X
+  00a3 8a       [3]             PULH  
+  00a4 af01     [2]             AIX   #1
+  00a6 cd0000   [6]             JSR   _LCMP
+  00a9 8a       [3]             PULH  
+  00aa 2406     [3]             BCC   LB2 ;abs = 00b2
+  00ac 9efe0b   [5]             LDHX  11,SP
+  00af          LAF:    
+  00af cc01d7   [4]             JMP   L1D7 ;abs = 01d7
+  00b2          LB2:    
+  512:    
+  513:    ra = curve[pos].r;
+  00b2 95       [2]             TSX   
+  00b3 e619     [3]             LDA   25,X
+  00b5 ae05     [2]             LDX   #5
+  00b7 42       [5]             MUL   
+  00b8 9eeb1e   [4]             ADD   30,SP
+  00bb 87       [2]             PSHA  
+  00bc 9f       [1]             TXA   
+  00bd 95       [2]             TSX   
+  00be e91d     [3]             ADC   29,X
+  00c0 af11     [2]             AIX   #17
+  00c2 89       [2]             PSHX  
+  00c3 8b       [2]             PSHH  
+  00c4 87       [2]             PSHA  
+  00c5 95       [2]             TSX   
+  00c6 ee03     [3]             LDX   3,X
+  00c8 8a       [3]             PULH  
+  00c9 af01     [2]             AIX   #1
+  00cb 9ee704   [4]             STA   4,SP
+  00ce a604     [2]             LDA   #4
+  00d0 cd0000   [6]             JSR   _COPY
+  514:    tb = curve[pos+1].t * 10;
+  00d3 95       [2]             TSX   
+  00d4 e601     [3]             LDA   1,X
+  00d6 87       [2]             PSHA  
+  00d7 fe       [3]             LDX   ,X
+  00d8 8a       [3]             PULH  
+  00d9 e605     [3]             LDA   5,X
+  00db ae0a     [2]             LDX   #10
+  00dd cd0000   [6]             JSR   _BMULS
+  515:    rb = curve[pos+1].r;
+  00e0 89       [2]             PSHX  
+  00e1 95       [2]             TSX   
+  00e2 af16     [2]             AIX   #22
+  00e4 89       [2]             PSHX  
+  00e5 8b       [2]             PSHH  
+  00e6 95       [2]             TSX   
+  00e7 e705     [3]             STA   5,X
+  00e9 e604     [3]             LDA   4,X
+  00eb 87       [2]             PSHA  
+  00ec ee03     [3]             LDX   3,X
+  00ee 8a       [3]             PULH  
+  00ef af06     [2]             AIX   #6
+  00f1 a604     [2]             LDA   #4
+  00f3 cd0000   [6]             JSR   _COPY
+  516:  
+  517:    /*
+  518:      ta - tb    T - tb     ta - T               ta(R-rb) + tb(ra-R)
+  519:      ------- = -------- = --------  ====>   T = -------------------
+  520:      ra - rb    R - rb     ra - R                     ra - rb
+  521:    */
+  522:    tmp1 = res - rb;
+  00f6 95       [2]             TSX   
+  00f7 af16     [2]             AIX   #22
+  00f9 89       [2]             PSHX  
+  00fa 8b       [2]             PSHH  
+  00fb af0a     [2]             AIX   #10
+  00fd cd0000   [6]             JSR   _LSUB
+  0100 afe8     [2]             AIX   #-24
+  0102 cd0000   [6]             JSR   _POP32
+  523:    tmp1 *= ta;
+  0105 9efe0d   [5]             LDHX  13,SP
+  0108 9f       [1]             TXA   
+  0109 8b       [2]             PSHH  
+  010a 88       [3]             PULX  
+  010b 87       [2]             PSHA  
+  010c cd0000   [6]             JSR   _SEXT16_32
+  010f 95       [2]             TSX   
+  0110 af0c     [2]             AIX   #12
+  0112 89       [2]             PSHX  
+  0113 8b       [2]             PSHH  
+  0114 aff4     [2]             AIX   #-12
+  0116 cd0000   [6]             JSR   _LMUL
+  0119 af0c     [2]             AIX   #12
+  011b cd0000   [6]             JSR   _POP32
+  524:    tmp2 = ra - res;
+  011e 95       [2]             TSX   
+  011f af24     [2]             AIX   #36
+  0121 89       [2]             PSHX  
+  0122 8b       [2]             PSHH  
+  0123 aff2     [2]             AIX   #-14
+  0125 cd0000   [6]             JSR   _LSUB
+  0128 affc     [2]             AIX   #-4
+  012a cd0000   [6]             JSR   _POP32
+  525:    tmp2 *= tb;
+  012d 95       [2]             TSX   
+  012e e607     [3]             LDA   7,X
+  0130 ee04     [3]             LDX   4,X
+  0132 87       [2]             PSHA  
+  0133 cd0000   [6]             JSR   _SEXT16_32
+  0136 95       [2]             TSX   
+  0137 af16     [2]             AIX   #22
+  0139 89       [2]             PSHX  
+  013a 8b       [2]             PSHH  
+  013b afea     [2]             AIX   #-22
+  013d cd0000   [6]             JSR   _LMUL
+  0140 af16     [2]             AIX   #22
+  0142 cd0000   [6]             JSR   _POP32
+  526:    tmp1 = tmp1 + tmp2;
+  0145 95       [2]             TSX   
+  0146 af10     [2]             AIX   #16
+  0148 89       [2]             PSHX  
+  0149 8b       [2]             PSHH  
+  014a af06     [2]             AIX   #6
+  014c cd0000   [6]             JSR   _LADD
+  014f affa     [2]             AIX   #-6
+  0151 cd0000   [6]             JSR   _POP32
+  527:    tmp2 = ra - rb;
+  0154 95       [2]             TSX   
+  0155 af1e     [2]             AIX   #30
+  0157 89       [2]             PSHX  
+  0158 8b       [2]             PSHH  
+  0159 affc     [2]             AIX   #-4
+  015b cd0000   [6]             JSR   _LSUB
+  015e affc     [2]             AIX   #-4
+  0160 cd0000   [6]             JSR   _POP32
+  528:    if( tmp2==0 ){
+  0163 95       [2]             TSX   
+  0164 e619     [3]             LDA   25,X
+  0166 ea18     [3]             ORA   24,X
+  0168 ea17     [3]             ORA   23,X
+  016a ea16     [3]             ORA   22,X
+  016c a70a     [2]             AIS   #10
+  016e 2617     [3]             BNE   L187 ;abs = 0187
+  529:      PERRNO(ERRNO_DIVIDE_ZERO,0);
+  0170 ae03     [2]             LDX   #3
+  0172 8c       [1]             CLRH  
+  0173 89       [2]             PSHX  
+  0174 8b       [2]             PSHH  
+  0175 ae53     [2]             LDX   #83
+  0177 89       [2]             PSHX  
+  0178 8b       [2]             PSHH  
+  0179 450000   [3]             LDHX  @"C:\Users\Administrator\Desktop\Fms\FMS\\260\302\314\25110V3T\05 Devices\ntc.c"
+  017c 89       [2]             PSHX  
+  017d 8b       [2]             PSHH  
+  017e 450211   [3]             LDHX  #529
+  0181 89       [2]             PSHX  
+  0182 8b       [2]             PSHH  
+  0183 5f       [1]             CLRX  
+  0184 8c       [1]             CLRH  
+  530:      return -2730;
+  0185 2048     [3]             BRA   L1CF ;abs = 01cf
+  0187          L187:   
+  0187 af16     [2]             AIX   #22
+  531:    }
+  532:    tmp1 = tmp1+(tmp2+1)/2;
+  0189 cd0000   [6]             JSR   _LINC
+  018c 95       [2]             TSX   
+  018d cd0000   [6]             JSR   _LDIVS_RC
+  0190 00000002         DC.L  2
+  0194 af0a     [2]             AIX   #10
+  0196 89       [2]             PSHX  
+  0197 8b       [2]             PSHH  
+  0198 aff2     [2]             AIX   #-14
+  019a cd0000   [6]             JSR   _LADD
+  019d af0e     [2]             AIX   #14
+  019f cd0000   [6]             JSR   _POP32
+  533:    tmp1 /= tmp2;  
+  01a2 95       [2]             TSX   
+  01a3 af14     [2]             AIX   #20
+  01a5 89       [2]             PSHX  
+  01a6 8b       [2]             PSHH  
+  01a7 affa     [2]             AIX   #-6
+  01a9 cd0000   [6]             JSR   _LDIVS
+  01ac cd0000   [6]             JSR   _POP32
+  534:    if( tmp1>0xFFFF ){
+  01af 9efe0f   [5]             LDHX  15,SP
+  01b2 a708     [2]             AIS   #8
+  01b4 9323     [3]             BLE   L1D9 ;abs = 01d9
+  535:      PERRNO(ERRNO_CALC_OVERFLOW,(int)(tmp1>>16));
+  01b6 9eff05   [5]             STHX  5,SP
+  01b9 ae04     [2]             LDX   #4
+  01bb 8c       [1]             CLRH  
+  01bc 89       [2]             PSHX  
+  01bd 8b       [2]             PSHH  
+  01be ae53     [2]             LDX   #83
+  01c0 89       [2]             PSHX  
+  01c1 8b       [2]             PSHH  
+  01c2 450000   [3]             LDHX  @"C:\Users\Administrator\Desktop\Fms\FMS\\260\302\314\25110V3T\05 Devices\ntc.c"
+  01c5 89       [2]             PSHX  
+  01c6 8b       [2]             PSHH  
+  01c7 450217   [3]             LDHX  #535
+  01ca 89       [2]             PSHX  
+  01cb 8b       [2]             PSHH  
+  01cc 9efe0d   [5]             LDHX  13,SP
+  01cf          L1CF:   
+  01cf cd0000   [6]             JSR   perrno
+  01d2 a708     [2]             AIS   #8
+  536:      return -2730;
+  01d4 45f556   [3]             LDHX  #-2730
+  01d7          L1D7:   
+  01d7 2003     [3]             BRA   L1DC ;abs = 01dc
+  01d9          L1D9:   
+  537:    }
+  538:  
+  539:    return (signed short)tmp1;
+  01d9 9efe09   [5]             LDHX  9,SP
+  01dc          L1DC:   
+  540:  
+  541:  }
+  01dc a71a     [2]             AIS   #26
+  01de 81       [6]             RTS   
+  542:  
+  543:  signed short ntc_res_to_temp(unsigned long res, unsigned char type)
+  544:  {
+
+Function: ntc_res_to_temp
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices\ntc.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\ntc.c.o" -WmsgSd1106
+
+  0000 a7f9     [2]             AIS   #-7
+  545:  
+  546:    temp_node_t *  curve;
+  547:    unsigned char  length;
+  548:    unsigned char  pos;
+  549:    signed short   temp;
+  550:    
+  551:  
+  552:    if( type>=NTC_CURVE_MAX ){
+  0002 a103     [2]             CMP   #3
+  0004 2520     [3]             BCS   L26 ;abs = 0026
+  553:      PERRNO(ERRNO_INVALID_PARAMETERS,type);
+  0006 ae01     [2]             LDX   #1
+  0008 8c       [1]             CLRH  
+  0009 89       [2]             PSHX  
+  000a 8b       [2]             PSHH  
+  000b ae53     [2]             LDX   #83
+  000d 89       [2]             PSHX  
+  000e 8b       [2]             PSHH  
+  000f 450000   [3]             LDHX  @"C:\Users\Administrator\Desktop\Fms\FMS\\260\302\314\25110V3T\05 Devices\ntc.c"
+  0012 89       [2]             PSHX  
+  0013 8b       [2]             PSHH  
+  0014 450229   [3]             LDHX  #553
+  0017 89       [2]             PSHX  
+  0018 8b       [2]             PSHH  
+  0019 97       [1]             TAX   
+  001a 8c       [1]             CLRH  
+  001b cd0000   [6]             JSR   perrno
+  001e a708     [2]             AIS   #8
+  554:      return  -2730;
+  0020 45f556   [3]             LDHX  #-2730
+  0023 cc00b9   [4]             JMP   LB9 ;abs = 00b9
+  0026          L26:    
+  555:    }
+  556:  
+  557:    curve = temp_curve[type].curve;
+  0026 ae05     [2]             LDX   #5
+  0028 42       [5]             MUL   
+  0029 8c       [1]             CLRH  
+  002a 97       [1]             TAX   
+  002b 9ebe0002 [6]             LDHX  @temp_curve:2,X
+  002f 9eff06   [5]             STHX  6,SP
+  558:    length = temp_curve[type].length;
+  0032 8b       [2]             PSHH  
+  0033 8c       [1]             CLRH  
+  0034 89       [2]             PSHX  
+  0035 97       [1]             TAX   
+  0036 d60004   [4]             LDA   @temp_curve:4,X
+  559:  //  DBG_PRINTF("ntc search\n");
+  560:    pos = ntc_search(res,curve,length);
+  0039 9efe0e   [5]             LDHX  14,SP
+  003c 89       [2]             PSHX  
+  003d 8b       [2]             PSHH  
+  003e 9efe0e   [5]             LDHX  14,SP
+  0041 89       [2]             PSHX  
+  0042 8b       [2]             PSHH  
+  0043 95       [2]             TSX   
+  0044 ee04     [3]             LDX   4,X
+  0046 9ee707   [4]             STA   7,SP
+  0049 9ee606   [4]             LDA   6,SP
+  004c 87       [2]             PSHA  
+  004d 9ee608   [4]             LDA   8,SP
+  0050 8a       [3]             PULH  
+  0051 cd0000   [6]             JSR   ntc_search
+  0054 a704     [2]             AIS   #4
+  561:    
+  562:    NTC_PRINTF(">> %dC @ %d, ", curve[pos].t, pos);
+  0056 95       [2]             TSX   
+  0057 e703     [3]             STA   3,X
+  0059 87       [2]             PSHA  
+  005a 5f       [1]             CLRX  
+  005b 89       [2]             PSHX  
+  005c ae05     [2]             LDX   #5
+  005e 42       [5]             MUL   
+  005f 9eeb0b   [4]             ADD   11,SP
+  0062 9ee707   [4]             STA   7,SP
+  0065 9f       [1]             TXA   
+  0066 95       [2]             TSX   
+  0067 e909     [3]             ADC   9,X
+  0069 87       [2]             PSHA  
+  006a ee06     [3]             LDX   6,X
+  006c 8a       [3]             PULH  
+  006d fe       [3]             LDX   ,X
+  006e 9f       [1]             TXA   
+  006f 95       [2]             TSX   
+  0070 e706     [3]             STA   6,X
+  0072 48       [1]             LSLA  
+  0073 4f       [1]             CLRA  
+  0074 a200     [2]             SBC   #0
+  0076 ee06     [3]             LDX   6,X
+  0078 89       [2]             PSHX  
+  0079 87       [2]             PSHA  
+  007a 450000   [3]             LDHX  @">> %dC @ %d, "
+  007d 89       [2]             PSHX  
+  007e 8b       [2]             PSHH  
+  007f cd0000   [6]             JSR   empty_printf
+  0082 a706     [2]             AIS   #6
+  563:    
+  564:  //  DBG_PRINTF("ntc insert\n");
+  565:    temp = ntc_insert(res,curve,pos,length);
+  0084 95       [2]             TSX   
+  0085 e60e     [3]             LDA   14,X
+  0087 87       [2]             PSHA  
+  0088 e60d     [3]             LDA   13,X
+  008a 87       [2]             PSHA  
+  008b e60c     [3]             LDA   12,X
+  008d 87       [2]             PSHA  
+  008e e60b     [3]             LDA   11,X
+  0090 87       [2]             PSHA  
+  0091 f6       [3]             LDA   ,X
+  0092 87       [2]             PSHA  
+  0093 e601     [3]             LDA   1,X
+  0095 87       [2]             PSHA  
+  0096 ee03     [3]             LDX   3,X
+  0098 9ee609   [4]             LDA   9,SP
+  009b cd0000   [6]             JSR   ntc_insert
+  009e a706     [2]             AIS   #6
+  566:    NTC_PRINTF(">> %d, ", (int)temp);
+  00a0 89       [2]             PSHX  
+  00a1 8b       [2]             PSHH  
+  00a2 9eff08   [5]             STHX  8,SP
+  00a5 450000   [3]             LDHX  @">> %d, "
+  00a8 89       [2]             PSHX  
+  00a9 8b       [2]             PSHH  
+  00aa cd0000   [6]             JSR   empty_printf
+  00ad a704     [2]             AIS   #4
+  567:  
+  568:    return temp;
+  00af 95       [2]             TSX   
+  00b0 e606     [3]             LDA   6,X
+  00b2 ee05     [3]             LDX   5,X
+  00b4 89       [2]             PSHX  
+  00b5 8a       [3]             PULH  
+  00b6 97       [1]             TAX   
+  00b7 a702     [2]             AIS   #2
+  00b9          LB9:    
+  569:  
+  570:  }
+  00b9 a707     [2]             AIS   #7
+  00bb 81       [6]             RTS   
+  571:  
+  572:  

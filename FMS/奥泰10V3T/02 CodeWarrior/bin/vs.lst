@@ -1,0 +1,789 @@
+ANSI-C/cC++ Compiler for HC08 V-5.0.32 Build 9279, Oct  7 2009
+
+    1:  /**
+    2:    ******************************************************************************
+    3:    * proj    firmware startup project
+    4:    * file    VS.c
+    5:    * ver     1.0
+    6:    * brief   This is a VS file for all C files.
+    7:    ------------------------------------------------------------------------------
+    8:    * 2012.02 created by taoyu@bakai.com
+    9:    */ 
+   10:  
+   11:  /* File Id -------------------------------------------------------------------*/
+   12:  #define _VS_C_  0x73
+   13:  #define FILE_No _VS_C_
+   14:  
+   15:  /* Includes ------------------------------------------------------------------*/
+   16:  #include  "vs.h"  /* mandotary */
+   17:  #include  "ltc6802.h"
+   18:  #include  "mcu.h"
+   19:  #include  "sc.h"
+   20:  
+   21:  /* Private Macros & Defines --------------------------------------------------*/
+   22:  
+   23:  /* Private typedefs ----------------------------------------------------------*/
+   24:  
+   25:  typedef struct
+   26:  {
+   27:    ltc6802_cfgreg_t  cfg;
+   28:    ltc6802_cvreg_t   cv;
+   29:    ltc6802_tmpreg_t  tmp;
+   30:  }
+   31:  vs_t;
+   32:  
+   33:  /* Private consts ------------------------------------------------------------*/
+   34:  
+   35:  /* Private variables ---------------------------------------------------------*/
+   36:  
+   37:  vs_t  vs;
+   38:  
+   39:  /* Private function prototypes -----------------------------------------------*/
+   40:  
+   41:  /* Global consts -------------------------------------------------------------*/
+   42:  
+   43:  /* Global variables ----------------------------------------------------------*/
+   44:  
+   45:  vs_data_t vs_data[LTC6802_MAX];
+   46:  
+   47:  /* Functions -----------------------------------------------------------------*/
+   48:  
+   49:  /**
+   50:    * bref    VS function
+   51:    * param   none
+   52:    * retval  none
+   53:    */
+   54:  
+   55:  static void vs_clear(unsigned char dev)
+   56:  {
+
+Function: vs_clear
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\vs.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\vs.c.o" -WmsgSd1106
+
+  0000 87       [2]             PSHA  
+  0001 8b       [2]             PSHH  
+   57:    unsigned char i;
+   58:    vs_data[dev].itemp = 0x8000;
+  0002 62       [1]             NSA   
+  0003 a4f0     [2]             AND   #-16
+  0005 48       [1]             LSLA  
+  0006 8c       [1]             CLRH  
+  0007 97       [1]             TAX   
+  0008 4f       [1]             CLRA  
+  0009 d7001d   [4]             STA   @vs_data:29,X
+  000c a680     [2]             LDA   #-128
+  000e d7001c   [4]             STA   @vs_data:28,X
+   59:    vs_data[dev].vtemp1 = 0x8000;
+  0011 4f       [1]             CLRA  
+  0012 d70019   [4]             STA   @vs_data:25,X
+  0015 a680     [2]             LDA   #-128
+  0017 d70018   [4]             STA   @vs_data:24,X
+   60:    vs_data[dev].vtemp2 = 0x8000;
+  001a 4f       [1]             CLRA  
+  001b d7001b   [4]             STA   @vs_data:27,X
+  001e a680     [2]             LDA   #-128
+  0020 d7001a   [4]             STA   @vs_data:26,X
+   61:    for(i=0;i<12;i++) vs_data[dev].volt[i] = 0x8000;
+  0023 95       [2]             TSX   
+  0024 7f       [4]             CLR   ,X
+  0025          L25:    
+  0025 95       [2]             TSX   
+  0026 e601     [3]             LDA   1,X
+  0028 62       [1]             NSA   
+  0029 a4f0     [2]             AND   #-16
+  002b 48       [1]             LSLA  
+  002c fe       [3]             LDX   ,X
+  002d 58       [1]             LSLX  
+  002e 87       [2]             PSHA  
+  002f 4f       [1]             CLRA  
+  0030 49       [1]             ROLA  
+  0031 87       [2]             PSHA  
+  0032 9ee602   [4]             LDA   2,SP
+  0035 9eef02   [4]             STX   2,SP
+  0038 95       [2]             TSX   
+  0039 eb01     [3]             ADD   1,X
+  003b e701     [3]             STA   1,X
+  003d 4f       [1]             CLRA  
+  003e f9       [3]             ADC   ,X
+  003f 87       [2]             PSHA  
+  0040 ee01     [3]             LDX   1,X
+  0042 8a       [3]             PULH  
+  0043 4f       [1]             CLRA  
+  0044 d70001   [4]             STA   @vs_data:1,X
+  0047 a680     [2]             LDA   #-128
+  0049 d70000   [4]             STA   @vs_data,X
+  004c 95       [2]             TSX   
+  004d 6c02     [5]             INC   2,X
+  004f e602     [3]             LDA   2,X
+  0051 a10c     [2]             CMP   #12
+  0053 a702     [2]             AIS   #2
+  0055 25ce     [3]             BCS   L25 ;abs = 0025
+   62:  }
+  0057 a702     [2]             AIS   #2
+  0059 81       [6]             RTS   
+   63:  
+   64:  static void vs_scan(unsigned char dev)
+   65:  {
+
+Function: vs_scan
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\vs.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\vs.c.o" -WmsgSd1106
+
+  0000 87       [2]             PSHA  
+  0001 a7f3     [2]             AIS   #-13
+   66:    int res;
+   67:  
+   68:    gt_ePinNumber cs = gv_sSC.sVS.saLtc6802[dev].eLtc6802SpiCsN;
+  0003 ae05     [2]             LDX   #5
+  0005 42       [5]             MUL   
+  0006 89       [2]             PSHX  
+  0007 8a       [3]             PULH  
+  0008 97       [1]             TAX   
+  0009 8b       [2]             PSHH  
+  000a 9ebe0018 [6]             LDHX  @gv_sSC:24,X
+  000e 9eff05   [5]             STHX  5,SP
+  0011 8a       [3]             PULH  
+   69:    unsigned char da = gv_sSC.sVS.saLtc6802[dev].bDeviceAddress;
+  0012 97       [1]             TAX   
+  0013 d60015   [4]             LDA   @gv_sSC:21,X
+  0016 95       [2]             TSX   
+  0017 e705     [3]             STA   5,X
+   70:  
+   71:    /* set config */
+   72:    vs.cfg.cdc = 0x01;
+  0019 450000   [3]             LDHX  @vs
+  001c f6       [3]             LDA   ,X
+  001d a4f8     [2]             AND   #-8
+  001f aa01     [2]             ORA   #1
+  0021 f7       [2]             STA   ,X
+   73:    vs.cfg.cell10 = 0;
+  0022 a4f7     [2]             AND   #-9
+  0024 f7       [2]             STA   ,X
+   74:    vs.cfg.lvlpl = 0;
+  0025 a4ef     [2]             AND   #-17
+  0027 f7       [2]             STA   ,X
+   75:    vs.cfg.gpio1 = 1;
+  0028 aa20     [2]             ORA   #32
+  002a f7       [2]             STA   ,X
+   76:    vs.cfg.gpio2 = 1;
+  002b aa40     [2]             ORA   #64
+  002d f7       [2]             STA   ,X
+   77:    vs.cfg.wdt = 1;
+  002e aa80     [2]             ORA   #-128
+  0030 f7       [2]             STA   ,X
+   78:    vs.cfg.dcc8_1 = 0;
+  0031 8c       [1]             CLRH  
+  0032 4f       [1]             CLRA  
+  0033 c70001   [4]             STA   vs:1
+   79:    vs.cfg.dcc12_9 = 0;
+  0036 c60002   [4]             LDA   vs:2
+  0039 a4f0     [2]             AND   #-16
+  003b c70002   [4]             STA   vs:2
+   80:    {
+   81:      unsigned short bal;
+   82:      bal = vs_data[dev].balance;
+  003e 9eee0e   [4]             LDX   14,SP
+  0041 9f       [1]             TXA   
+  0042 62       [1]             NSA   
+  0043 a4f0     [2]             AND   #-16
+  0045 48       [1]             LSLA  
+  0046 97       [1]             TAX   
+  0047 9ebe001e [6]             LDHX  @vs_data:30,X
+  004b 9eff08   [5]             STHX  8,SP
+   83:      if( (bal&0x8000)==0 ){
+  004e 95       [2]             TSX   
+  004f e607     [3]             LDA   7,X
+  0051 2b1c     [3]             BMI   L6F ;abs = 006f
+   84:        bal &= 0x0FFF;
+  0053 a40f     [2]             AND   #15
+  0055 e707     [3]             STA   7,X
+   85:  
+   86:        if( bal==0 ){
+  0057 9efe08   [5]             LDHX  8,SP
+  005a 2603     [3]             BNE   L5F ;abs = 005f
+   87:          LED_BAL = LED_OFF;
+  005c 1400     [5]             BSET  2,_PTDD
+   88:        }else{
+  005e 65       [3]             SKIP2 L61 ;abs = 0061
+  005f          L5F:    
+   89:          LED_BAL = LED_ON;
+  005f 1500     [5]             BCLR  2,_PTDD
+  0061          L61:    
+   90:        }
+   91:  
+   92:        vs.cfg.dcc8_1 = (unsigned char)(bal);
+  0061 cf0001   [4]             STX   vs:1
+   93:        vs.cfg.dcc12_9 = (unsigned char)(bal>>8);
+  0064 450002   [3]             LDHX  @vs:2
+  0067 f6       [3]             LDA   ,X
+  0068 9ee808   [4]             EOR   8,SP
+  006b a40f     [2]             AND   #15
+  006d f8       [3]             EOR   ,X
+  006e f7       [2]             STA   ,X
+  006f          L6F:    
+   94:      }
+   95:    }
+   96:    vs.cfg.mci4_1 = 0xF;
+  006f 450002   [3]             LDHX  @vs:2
+  0072 f6       [3]             LDA   ,X
+  0073 aaf0     [2]             ORA   #-16
+  0075 f7       [2]             STA   ,X
+   97:    vs.cfg.mci12_5 = 0xFF;
+  0076 a6ff     [2]             LDA   #-1
+  0078 e701     [3]             STA   1,X
+   98:    vs.cfg.vuv = 0x00;
+  007a 4f       [1]             CLRA  
+  007b e702     [3]             STA   2,X
+   99:    vs.cfg.vov = 0x00;
+  007d e703     [3]             STA   3,X
+  100:    
+  101:    /* write config */
+  102:    (void)pin_low(cs);
+  007f 9efe04   [5]             LDHX  4,SP
+  0082 cd0000   [6]             JSR   pin_low
+  103:    (void)ltc6802_wrcfg(da, &vs.cfg);
+  0085 95       [2]             TSX   
+  0086 e605     [3]             LDA   5,X
+  0088 450000   [3]             LDHX  @vs
+  008b cd0000   [6]             JSR   ltc6802_wrcfg
+  008e cd025c   [6]             JSR   L25C ;abs = 025c
+  104:    (void)pin_high(cs);
+  105:  
+  106:    /* delay 20ms */
+  107:    delay_ms(20);
+  108:  
+  109:    /* start ad */
+  110:    (void)pin_low(cs);
+  111:    (void)ltc6802_stad(da, LTC6802_CMD_STCVAD);
+  0091 ae10     [2]             LDX   #16
+  0093 8c       [1]             CLRH  
+  0094 cd0000   [6]             JSR   ltc6802_stad
+  0097 cd025c   [6]             JSR   L25C ;abs = 025c
+  112:  //  (void)ltc6802_stad(da, LTC6802_CMD_STCVDC);
+  113:    (void)pin_high(cs);
+  114:  
+  115:    /* delay 20ms */
+  116:    delay_ms(20);
+  117:    
+  118:    /* read cvreg */
+  119:    (void)pin_low(cs);
+  120:    res = ltc6802_rdcv(da, &vs.cv);
+  009a 450006   [3]             LDHX  @vs:6
+  009d cd0000   [6]             JSR   ltc6802_rdcv
+  00a0 cd0272   [6]             JSR   L272 ;abs = 0272
+  121:    (void)pin_high(cs);
+  122:    if( res!=OK ) return;
+  00a3 2703     [3]             BEQ   LA8 ;abs = 00a8
+  00a5 cc0259   [4]             JMP   L259 ;abs = 0259
+  00a8          LA8:    
+  123:  
+  124:    /* volt convert */
+  125:    {
+  126:      unsigned char i,j;
+  127:      unsigned short volt;
+  128:      for(i=0,j=0;j<6;j++){
+  00a8 95       [2]             TSX   
+  00a9 6f06     [5]             CLR   6,X
+  00ab 7f       [4]             CLR   ,X
+  00ac          LAC:    
+  129:        volt = (vs.cv.group[j].c0v11_8<<8) + vs.cv.group[j].c0v7_0; //  1.5mV/bit
+  00ac 95       [2]             TSX   
+  00ad f6       [3]             LDA   ,X
+  00ae ae03     [2]             LDX   #3
+  00b0 42       [5]             MUL   
+  00b1 87       [2]             PSHA  
+  00b2 89       [2]             PSHX  
+  00b3 95       [2]             TSX   
+  00b4 ee01     [3]             LDX   1,X
+  00b6 8a       [3]             PULH  
+  00b7 d60006   [4]             LDA   @vs:6,X
+  00ba 8b       [2]             PSHH  
+  00bb 9ee705   [4]             STA   5,SP
+  00be d60007   [4]             LDA   @vs:7,X
+  00c1 87       [2]             PSHA  
+  00c2 a40f     [2]             AND   #15
+  00c4 95       [2]             TSX   
+  00c5 e704     [3]             STA   4,X
+  130:        volt = volt + (volt+1)/2; //  1mV/bit
+  00c7 9efe05   [5]             LDHX  5,SP
+  00ca cd0282   [6]             JSR   L282 ;abs = 0282
+  00cd 87       [2]             PSHA  
+  00ce 9f       [1]             TXA   
+  00cf 95       [2]             TSX   
+  00d0 eb06     [3]             ADD   6,X
+  00d2 e706     [3]             STA   6,X
+  00d4 86       [3]             PULA  
+  00d5 e905     [3]             ADC   5,X
+  00d7 e705     [3]             STA   5,X
+  131:        vs_data[dev].volt[i] = volt;
+  00d9 e611     [3]             LDA   17,X
+  00db 62       [1]             NSA   
+  00dc a4f0     [2]             AND   #-16
+  00de 48       [1]             LSLA  
+  00df ee0a     [3]             LDX   10,X
+  00e1 58       [1]             LSLX  
+  00e2 87       [2]             PSHA  
+  00e3 4f       [1]             CLRA  
+  00e4 49       [1]             ROLA  
+  00e5 87       [2]             PSHA  
+  00e6 9f       [1]             TXA   
+  00e7 95       [2]             TSX   
+  00e8 eb01     [3]             ADD   1,X
+  00ea 87       [2]             PSHA  
+  00eb 4f       [1]             CLRA  
+  00ec f9       [3]             ADC   ,X
+  00ed 87       [2]             PSHA  
+  00ee e607     [3]             LDA   7,X
+  00f0 8a       [3]             PULH  
+  00f1 88       [3]             PULX  
+  00f2 d70001   [4]             STA   @vs_data:1,X
+  00f5 9ee607   [4]             LDA   7,SP
+  00f8 d70000   [4]             STA   @vs_data,X
+  132:        i++;
+  00fb 95       [2]             TSX   
+  00fc 6c0b     [5]             INC   11,X
+  133:        volt = (vs.cv.group[j].c1v11_4<<4) + vs.cv.group[j].c1v3_0;
+  00fe e602     [3]             LDA   2,X
+  0100 a4f0     [2]             AND   #-16
+  0102 62       [1]             NSA   
+  0103 a40f     [2]             AND   #15
+  0105 9efe04   [5]             LDHX  4,SP
+  0108 9eee05   [4]             LDX   5,SP
+  010b de0008   [4]             LDX   @vs:8,X
+  010e 9ee704   [4]             STA   4,SP
+  0111 cd0289   [6]             JSR   L289 ;abs = 0289
+  0114 9ee705   [4]             STA   5,SP
+  0117 9ee604   [4]             LDA   4,SP
+  011a 9ee704   [4]             STA   4,SP
+  011d 9f       [1]             TXA   
+  011e 95       [2]             TSX   
+  011f eb03     [3]             ADD   3,X
+  0121 e703     [3]             STA   3,X
+  0123 e604     [3]             LDA   4,X
+  0125 a900     [2]             ADC   #0
+  0127 87       [2]             PSHA  
+  0128 ee03     [3]             LDX   3,X
+  012a 8a       [3]             PULH  
+  012b 9eff07   [5]             STHX  7,SP
+  012e cd0282   [6]             JSR   L282 ;abs = 0282
+  134:        volt = volt + (volt+1)/2; //  1mV/bit
+  0131 9ee704   [4]             STA   4,SP
+  0134 9f       [1]             TXA   
+  0135 95       [2]             TSX   
+  0136 eb07     [3]             ADD   7,X
+  0138 e707     [3]             STA   7,X
+  013a e603     [3]             LDA   3,X
+  013c e906     [3]             ADC   6,X
+  013e e706     [3]             STA   6,X
+  135:        vs_data[dev].volt[i] = volt;
+  0140 e60b     [3]             LDA   11,X
+  0142 48       [1]             LSLA  
+  0143 5f       [1]             CLRX  
+  0144 59       [1]             ROLX  
+  0145 9eeb02   [4]             ADD   2,SP
+  0148 9ee702   [4]             STA   2,SP
+  014b 9f       [1]             TXA   
+  014c a900     [2]             ADC   #0
+  014e 87       [2]             PSHA  
+  014f 95       [2]             TSX   
+  0150 ee02     [3]             LDX   2,X
+  0152 9ee609   [4]             LDA   9,SP
+  0155 8a       [3]             PULH  
+  0156 d70001   [4]             STA   @vs_data:1,X
+  0159 9ee607   [4]             LDA   7,SP
+  015c d70000   [4]             STA   @vs_data,X
+  136:        i++;
+  015f 95       [2]             TSX   
+  0160 6c0b     [5]             INC   11,X
+  0162 6c05     [5]             INC   5,X
+  0164 e605     [3]             LDA   5,X
+  0166 a106     [2]             CMP   #6
+  0168 a705     [2]             AIS   #5
+  016a 2403     [3]             BCC   L16F ;abs = 016f
+  016c cc00ac   [4]             JMP   LAC ;abs = 00ac
+  016f          L16F:   
+  137:      }
+  138:    }
+  139:  
+  140:    /* start tmpad */
+  141:    (void)pin_low(cs);
+  016f 9efe04   [5]             LDHX  4,SP
+  0172 cd0000   [6]             JSR   pin_low
+  142:    (void)ltc6802_stad(da, LTC6802_CMD_STTMPAD);
+  0175 95       [2]             TSX   
+  0176 e605     [3]             LDA   5,X
+  0178 ae30     [2]             LDX   #48
+  017a 8c       [1]             CLRH  
+  017b cd0000   [6]             JSR   ltc6802_stad
+  017e cd025c   [6]             JSR   L25C ;abs = 025c
+  143:    (void)pin_high(cs);
+  144:  
+  145:    /* delay 20ms */
+  146:    delay_ms(20);
+  147:    
+  148:    /* read tmpreg */
+  149:    (void)pin_low(cs);
+  150:    res = ltc6802_rdtmp(da, &vs.tmp);
+  0181 450018   [3]             LDHX  @vs:24
+  0184 cd0000   [6]             JSR   ltc6802_rdtmp
+  0187 cd0272   [6]             JSR   L272 ;abs = 0272
+  151:    (void)pin_high(cs);
+  152:    if( res!=OK ) return;
+  018a 2703     [3]             BEQ   L18F ;abs = 018f
+  018c cc0259   [4]             JMP   L259 ;abs = 0259
+  018f          L18F:   
+  153:  
+  154:    
+  155:    /* save temp */
+  156:    {
+  157:      unsigned short volt;
+  158:  
+  159:      volt = (vs.tmp.etmp1_11_8<<8) + vs.tmp.etmp1_7_0;
+  018f c60018   [4]             LDA   vs:24
+  0192 95       [2]             TSX   
+  0193 e70a     [3]             STA   10,X
+  0195 c60019   [4]             LDA   vs:25
+  0198 a40f     [2]             AND   #15
+  019a e709     [3]             STA   9,X
+  160:      vs_data[dev].vtemp1 = volt+(volt+1)/2;
+  019c ee0d     [3]             LDX   13,X
+  019e 9f       [1]             TXA   
+  019f 62       [1]             NSA   
+  01a0 a4f0     [2]             AND   #-16
+  01a2 48       [1]             LSLA  
+  01a3 9efe0a   [5]             LDHX  10,SP
+  01a6 af01     [2]             AIX   #1
+  01a8 87       [2]             PSHA  
+  01a9 8b       [2]             PSHH  
+  01aa 86       [3]             PULA  
+  01ab 44       [1]             LSRA  
+  01ac 56       [1]             RORX  
+  01ad 87       [2]             PSHA  
+  01ae 9f       [1]             TXA   
+  01af 95       [2]             TSX   
+  01b0 eb0c     [3]             ADD   12,X
+  01b2 8c       [1]             CLRH  
+  01b3 9eee02   [4]             LDX   2,SP
+  01b6 d70019   [4]             STA   @vs_data:25,X
+  01b9 9ee60c   [4]             LDA   12,SP
+  01bc 9ee901   [4]             ADC   1,SP
+  01bf d70018   [4]             STA   @vs_data:24,X
+  161:  
+  162:      volt = (vs.tmp.etmp2_11_4<<4) + vs.tmp.etmp2_3_0;
+  01c2 c60019   [4]             LDA   vs:25
+  01c5 a4f0     [2]             AND   #-16
+  01c7 62       [1]             NSA   
+  01c8 a40f     [2]             AND   #15
+  01ca ce001a   [4]             LDX   vs:26
+  01cd 9ee701   [4]             STA   1,SP
+  01d0 cd0289   [6]             JSR   L289 ;abs = 0289
+  01d3 87       [2]             PSHA  
+  01d4 9ee602   [4]             LDA   2,SP
+  01d7 9ee702   [4]             STA   2,SP
+  01da 9f       [1]             TXA   
+  01db 95       [2]             TSX   
+  01dc eb01     [3]             ADD   1,X
+  01de e701     [3]             STA   1,X
+  01e0 86       [3]             PULA  
+  01e1 a900     [2]             ADC   #0
+  01e3 87       [2]             PSHA  
+  01e4 8a       [3]             PULH  
+  01e5 88       [3]             PULX  
+  01e6 9eff0b   [5]             STHX  11,SP
+  01e9 cd0282   [6]             JSR   L282 ;abs = 0282
+  163:      vs_data[dev].vtemp2 = volt+(volt+1)/2;
+  01ec 87       [2]             PSHA  
+  01ed 9f       [1]             TXA   
+  01ee 95       [2]             TSX   
+  01ef eb0c     [3]             ADD   12,X
+  01f1 8c       [1]             CLRH  
+  01f2 9eee02   [4]             LDX   2,SP
+  01f5 d7001b   [4]             STA   @vs_data:27,X
+  01f8 86       [3]             PULA  
+  01f9 9ee90b   [4]             ADC   11,SP
+  01fc d7001a   [4]             STA   @vs_data:26,X
+  164:  
+  165:      volt = (vs.tmp.itmp_11_8<<8) + vs.tmp.itmp_7_0;
+  01ff c6001b   [4]             LDA   vs:27
+  0202 95       [2]             TSX   
+  0203 e70b     [3]             STA   11,X
+  0205 c6001c   [4]             LDA   vs:28
+  0208 a40f     [2]             AND   #15
+  020a e70a     [3]             STA   10,X
+  166:      volt *= 10; //  15mV/bit
+  020c ae0a     [2]             LDX   #10
+  020e 8c       [1]             CLRH  
+  020f 89       [2]             PSHX  
+  0210 8b       [2]             PSHH  
+  0211 9efe0d   [5]             LDHX  13,SP
+  0214 cd0000   [6]             JSR   _IMUL_STAR08
+  0217 a702     [2]             AIS   #2
+  0219 9eff0b   [5]             STHX  11,SP
+  021c ad64     [5]             BSR   L282 ;abs = 0282
+  167:      volt = volt+(volt+1)/2; //  10mV/bit
+  021e 87       [2]             PSHA  
+  021f 9f       [1]             TXA   
+  0220 95       [2]             TSX   
+  0221 eb0c     [3]             ADD   12,X
+  0223 e70c     [3]             STA   12,X
+  0225 86       [3]             PULA  
+  0226 e90b     [3]             ADC   11,X
+  0228 e70b     [3]             STA   11,X
+  168:      volt = (volt+4)/8-2730+400; //  -40.0C~
+  022a 9efe0b   [5]             LDHX  11,SP
+  022d af04     [2]             AIX   #4
+  022f 8b       [2]             PSHH  
+  0230 86       [3]             PULA  
+  0231 44       [1]             LSRA  
+  0232 56       [1]             RORX  
+  0233 44       [1]             LSRA  
+  0234 56       [1]             RORX  
+  0235 44       [1]             LSRA  
+  0236 56       [1]             RORX  
+  0237 87       [2]             PSHA  
+  0238 9f       [1]             TXA   
+  0239 abe6     [2]             ADD   #-26
+  023b 87       [2]             PSHA  
+  023c 95       [2]             TSX   
+  023d e601     [3]             LDA   1,X
+  023f a9f6     [2]             ADC   #-10
+  0241 87       [2]             PSHA  
+  0242 8a       [3]             PULH  
+  0243 88       [3]             PULX  
+  0244 9eff0c   [5]             STHX  12,SP
+  169:      vs_data[dev].itemp = volt;
+  0247 95       [2]             TSX   
+  0248 e60c     [3]             LDA   12,X
+  024a 8c       [1]             CLRH  
+  024b 9eee02   [4]             LDX   2,SP
+  024e d7001d   [4]             STA   @vs_data:29,X
+  0251 9ee60c   [4]             LDA   12,SP
+  0254 d7001c   [4]             STA   @vs_data:28,X
+  0257 a702     [2]             AIS   #2
+  0259          L259:   
+  170:    }
+  171:  }
+  0259 a70e     [2]             AIS   #14
+  025b 81       [6]             RTS   
+  025c          L25C:   
+  025c 9efe06   [5]             LDHX  6,SP
+  025f cd0000   [6]             JSR   pin_high
+  0262 ae14     [2]             LDX   #20
+  0264 8c       [1]             CLRH  
+  0265 cd0000   [6]             JSR   delay_ms
+  0268 9efe06   [5]             LDHX  6,SP
+  026b cd0000   [6]             JSR   pin_low
+  026e 95       [2]             TSX   
+  026f e607     [3]             LDA   7,X
+  0271 81       [6]             RTS   
+  0272          L272:   
+  0272 9eff0e   [5]             STHX  14,SP
+  0275 9efe06   [5]             LDHX  6,SP
+  0278 cd0000   [6]             JSR   pin_high
+  027b 9efe0e   [5]             LDHX  14,SP
+  027e 650001   [3]             CPHX  #1
+  0281 81       [6]             RTS   
+  0282          L282:   
+  0282 af01     [2]             AIX   #1
+  0284 8b       [2]             PSHH  
+  0285 86       [3]             PULA  
+  0286 44       [1]             LSRA  
+  0287 56       [1]             RORX  
+  0288 81       [6]             RTS   
+  0289          L289:   
+  0289 4f       [1]             CLRA  
+  028a 58       [1]             LSLX  
+  028b 49       [1]             ROLA  
+  028c 58       [1]             LSLX  
+  028d 49       [1]             ROLA  
+  028e 58       [1]             LSLX  
+  028f 49       [1]             ROLA  
+  0290 58       [1]             LSLX  
+  0291 49       [1]             ROLA  
+  0292 81       [6]             RTS   
+  172:  
+  173:  void vs_init(void)
+  174:  {
+
+Function: vs_init
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\vs.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\vs.c.o" -WmsgSd1106
+
+  0000 a7fd     [2]             AIS   #-3
+  175:  
+  176:    unsigned char i, j;
+  177:  
+  178:    for(i=0;i<LTC6802_MAX;i++){
+  0002 95       [2]             TSX   
+  0003 6f01     [5]             CLR   1,X
+  0005          L5:     
+  179:      vs_data[i].balance = 0x8000;
+  0005 ee01     [3]             LDX   1,X
+  0007 9f       [1]             TXA   
+  0008 62       [1]             NSA   
+  0009 a4f0     [2]             AND   #-16
+  000b 48       [1]             LSLA  
+  000c 8c       [1]             CLRH  
+  000d 97       [1]             TAX   
+  000e 4f       [1]             CLRA  
+  000f d7001f   [4]             STA   @vs_data:31,X
+  0012 a680     [2]             LDA   #-128
+  0014 d7001e   [4]             STA   @vs_data:30,X
+  180:      for(j=0;j<12;j++) vs_data[i].volt[j] = 0x8000;
+  0017 95       [2]             TSX   
+  0018 6f02     [5]             CLR   2,X
+  001a          L1A:    
+  001a 95       [2]             TSX   
+  001b e601     [3]             LDA   1,X
+  001d 62       [1]             NSA   
+  001e a4f0     [2]             AND   #-16
+  0020 48       [1]             LSLA  
+  0021 ee02     [3]             LDX   2,X
+  0023 58       [1]             LSLX  
+  0024 9ee701   [4]             STA   1,SP
+  0027 4f       [1]             CLRA  
+  0028 49       [1]             ROLA  
+  0029 87       [2]             PSHA  
+  002a 89       [2]             PSHX  
+  002b 95       [2]             TSX   
+  002c e602     [3]             LDA   2,X
+  002e fb       [3]             ADD   ,X
+  002f f7       [2]             STA   ,X
+  0030 4f       [1]             CLRA  
+  0031 e901     [3]             ADC   1,X
+  0033 87       [2]             PSHA  
+  0034 8a       [3]             PULH  
+  0035 88       [3]             PULX  
+  0036 4f       [1]             CLRA  
+  0037 d70001   [4]             STA   @vs_data:1,X
+  003a a680     [2]             LDA   #-128
+  003c d70000   [4]             STA   @vs_data,X
+  003f 95       [2]             TSX   
+  0040 6c03     [5]             INC   3,X
+  0042 e603     [3]             LDA   3,X
+  0044 a10c     [2]             CMP   #12
+  0046 8a       [3]             PULH  
+  0047 25d1     [3]             BCS   L1A ;abs = 001a
+  181:      vs_data[i].itemp = 0x8000;
+  0049 95       [2]             TSX   
+  004a fe       [3]             LDX   ,X
+  004b 4f       [1]             CLRA  
+  004c 8c       [1]             CLRH  
+  004d d7001d   [4]             STA   @vs_data:29,X
+  0050 a680     [2]             LDA   #-128
+  0052 d7001c   [4]             STA   @vs_data:28,X
+  182:      vs_data[i].vtemp1 = 0x8000;
+  0055 4f       [1]             CLRA  
+  0056 d70019   [4]             STA   @vs_data:25,X
+  0059 a680     [2]             LDA   #-128
+  005b d70018   [4]             STA   @vs_data:24,X
+  183:      vs_data[i].vtemp2 = 0x8000;
+  005e 4f       [1]             CLRA  
+  005f d7001b   [4]             STA   @vs_data:27,X
+  0062 a680     [2]             LDA   #-128
+  0064 d7001a   [4]             STA   @vs_data:26,X
+  0067 95       [2]             TSX   
+  0068 6c01     [5]             INC   1,X
+  006a e601     [3]             LDA   1,X
+  006c a102     [2]             CMP   #2
+  006e 2595     [3]             BCS   L5 ;abs = 0005
+  184:    }
+  185:  
+  186:    (void)ltc6802_init();
+  0070 cd0000   [6]             JSR   ltc6802_init
+  187:    for(i=0;i<gv_sSC.sVS.bLtc6802Count;i++){
+  0073 95       [2]             TSX   
+  0074 6f01     [5]             CLR   1,X
+  0076 2013     [3]             BRA   L8B ;abs = 008b
+  0078          L78:    
+  188:      (void)pin_high(gv_sSC.sVS.saLtc6802[i].eLtc6802EnaN);
+  0078 95       [2]             TSX   
+  0079 e601     [3]             LDA   1,X
+  007b ae05     [2]             LDX   #5
+  007d 42       [5]             MUL   
+  007e 89       [2]             PSHX  
+  007f 8a       [3]             PULH  
+  0080 97       [1]             TAX   
+  0081 9ebe0016 [6]             LDHX  @gv_sSC:22,X
+  0085 cd0000   [6]             JSR   pin_high
+  0088 95       [2]             TSX   
+  0089 6c01     [5]             INC   1,X
+  008b          L8B:    
+  008b c60014   [4]             LDA   gv_sSC:20
+  008e e101     [3]             CMP   1,X
+  0090 22e6     [3]             BHI   L78 ;abs = 0078
+  189:    }
+  190:  
+  191:  }
+  0092 a703     [2]             AIS   #3
+  0094 81       [6]             RTS   
+  192:  
+  193:  void vs_proc(void)
+  194:  {
+
+Function: vs_proc
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\vs.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\vs.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  195:    unsigned char i;
+  196:    for(i=0;i<gv_sSC.sVS.bLtc6802Count;i++){
+  0001 95       [2]             TSX   
+  0002 7f       [4]             CLR   ,X
+  0003 200b     [3]             BRA   L10 ;abs = 0010
+  0005          L5:     
+  197:      vs_clear(i);
+  0005 f6       [3]             LDA   ,X
+  0006 cd0000   [6]             JSR   vs_clear
+  198:      vs_scan(i);
+  0009 95       [2]             TSX   
+  000a f6       [3]             LDA   ,X
+  000b cd0000   [6]             JSR   vs_scan
+  000e 95       [2]             TSX   
+  000f 7c       [4]             INC   ,X
+  0010          L10:    
+  0010 c60014   [4]             LDA   gv_sSC:20
+  0013 f1       [3]             CMP   ,X
+  0014 22ef     [3]             BHI   L5 ;abs = 0005
+  199:    }
+  200:  }
+  0016 8a       [3]             PULH  
+  0017 81       [6]             RTS   
+  201:  
+  202:  void vs_reset(void)
+  203:  {
+
+Function: vs_reset
+Source  : C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application\vs.c
+Options : -AddIncl../preinc.h -Cs08 -D__NO_FLOAT__ -Env"GENPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\src;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\lib;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\src;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\06 Platform;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\04 Modules;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\Sources;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\07 Application;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\05 Devices;C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"LIBPATH=D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\hc08c\device\asm_include;D:\Program Files\Freescale\CodeWarrior for Microcontrollers V6.3\lib\HC08c\include" -Env"OBJPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Env"TEXTPATH=C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\bin" -Lasm=%n.lst -Ms -ObjN="C:\Users\Administrator\Desktop\Fms\FMS\°ÂÌ©10V3T\02 CodeWarrior\mc9s08dz60_Data\Standard\ObjectCode\vs.c.o" -WmsgSd1106
+
+  0000 8b       [2]             PSHH  
+  204:    unsigned char i;
+  205:    for(i=0;i<gv_sSC.sVS.bLtc6802Count;i++){
+  0001 95       [2]             TSX   
+  0002 7f       [4]             CLR   ,X
+  0003 2010     [3]             BRA   L15 ;abs = 0015
+  0005          L5:     
+  206:      (void)pin_high(gv_sSC.sVS.saLtc6802[i].eLtc6802EnaN);
+  0005 f6       [3]             LDA   ,X
+  0006 ae05     [2]             LDX   #5
+  0008 42       [5]             MUL   
+  0009 89       [2]             PSHX  
+  000a 8a       [3]             PULH  
+  000b 97       [1]             TAX   
+  000c 9ebe0016 [6]             LDHX  @gv_sSC:22,X
+  0010 cd0000   [6]             JSR   pin_high
+  0013 95       [2]             TSX   
+  0014 7c       [4]             INC   ,X
+  0015          L15:    
+  0015 c60014   [4]             LDA   gv_sSC:20
+  0018 f1       [3]             CMP   ,X
+  0019 22ea     [3]             BHI   L5 ;abs = 0005
+  207:    }
+  208:    (void)ltc6802_reset();
+  001b cd0000   [6]             JSR   ltc6802_reset
+  209:  }
+  001e 8a       [3]             PULH  
+  001f 81       [6]             RTS   
+  210:  
